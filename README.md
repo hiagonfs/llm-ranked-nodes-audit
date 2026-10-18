@@ -6,21 +6,34 @@ Research artifacts for the study:
 
 The study audits a confidence-guided procedure for constructing Bayesian network conditional probability tables (CPTs) with large language models and a midpoint approximation of the Ranked Nodes Method (RNM). It examines agreement with published reference networks, the effects of persona pooling, and the provenance of errors introduced during elicitation, response processing, and CPT completion.
 
-> **Package status:** the repository is being assembled. The directory and file names below define the target layout. Their inclusion in this README does not indicate that the corresponding artifacts have already been uploaded or verified.
-
 ## Reproducibility materials
 
-The `online-resource/` directory is intended to contain the documentation accompanying the computational artifacts:
+The supplementary documentation is organized into four Markdown documents in `online-resource/`:
 
 | Document | Scope |
-|---|---|
-| `prompts.md` | Complete confidence-screening, FullDist, persona, and retry instructions for both domains. |
-| `methodological-details.md` | Routing rules, midpoint RNM construction and fitting, pooling, alignment, metric definitions, and smoothing. |
-| `secondary-tables.md` | Complete scores, root/conditional decompositions, routing counts, and sensitivity results. |
-| `response-audit.md` | Inspection protocol, response identifiers, accepted tuples, relevant excerpts, and error contributions for the audited cases. |
-| `supplementary-material.pdf` | Consolidated supplementary document connecting the detailed evidence to the research questions. |
+| --- | --- |
+| [prompts.md](online-resource/prompts.md) | Confidence-screening and FullDist templates, domain personas, retry instructions, and complete prompt examples. |
+| [methodological-details.md](online-resource/methodological-details.md) | Experimental settings, confidence routing, midpoint RNM construction and fitting, pooling, alignment, and metric definitions. |
+| [secondary-tables.md](online-resource/secondary-tables.md) | Complete scores, supplementary metrics, root/conditional decompositions, routing counts, node contributions, and smoothing sensitivity. |
+| [response-audit.md](online-resource/response-audit.md) | Inspection protocol and 27 case records, with original excerpts, accepted/reference vectors, generation parameters, classifications, and error contributions. |
 
-Machine-readable tables belong in `results/`; full generation records belong in `generations/` and the preserved source archives in `archives/`.
+Generation and evaluation ZIPs, network specifications, and persona inputs are grouped in `data/`. Scripts and notebooks are grouped in `scripts/`.
+
+## Repository layout
+
+The repository uses three directories:
+
+| Directory | Contents |
+| --- | --- |
+| `data/` | Generation and evaluation ZIPs for each network–model pair, together with network and persona input specifications. |
+| `scripts/` | Generation and evaluation notebooks and supporting Python scripts. |
+| `online-resource/` | The four linked Markdown documents containing prompts, methodological details, supplementary tables, and the response audit. |
+
+`README.md` and `LICENSE` are kept at the repository root.
+
+Each network–model pair has two ZIP packages: **generation results** and **evaluation results**. For two networks and two model sizes, this gives four pairs and eight ZIPs. Their names identify the network, model, and package type. Network and persona inputs shared by both models can be stored once per network.
+
+The ZIPs preserve their internal organization, including complete CPTs, raw generation records, references, and evaluation tables. The three repository directories group these materials without requiring separate directories for every type of output.
 
 ## Study design
 
@@ -109,44 +122,23 @@ The manuscript reports the following settings for the archived generations:
 
 Some inherited decoding defaults and exact loaded model commits were not recorded. Generation and evaluation dependencies should be documented separately from recoverable execution records. A newly installed environment should be identified as a new environment rather than presented as the exact historical setup.
 
-## Repository layout
-
-The following layout guides package assembly:
-
-| Path | Intended contents |
-|---|---|
-| `archives/` | Original generation and evaluation ZIPs for the four network–model pairs, with an inventory and checksums. |
-| `networks/` | Graphs, variable descriptions, ordered states, and generation input specifications. |
-| `reference/` | bnRep reference CPT exports, source/version information, alignment metadata, and reference parent-configuration weights. |
-| `notebooks/generation/` | Generation notebooks corresponding to the archived experiments. |
-| `notebooks/evaluation/` | Evaluation and numerical-verification notebooks. |
-| `prompts/` | Exported prompt templates, domain personas, and retry instructions. |
-| `configs/` | Model, decoding, RNM, routing, pooling, and seed configurations. |
-| `generations/` | CPTs, raw responses, accepted/rejected attempts, routing decisions, anchors, and fitting metadata. |
-| `scripts/` | Code for extraction, pooling, alignment, evaluation, diagnostics, verification, and figure generation. |
-| `results/` | Consolidated scores, derived pool CPTs, row-level evaluations, audit summaries, and sensitivity tables. |
-| `figures/` | Figures used in the manuscript and supplement. |
-| `online-resource/` | Detailed documentation, audit evidence, supplementary tables, and supplementary PDF. |
-
-The archive inventory should map each source file to its network, model, function, and experimental version. Later notebook revisions should be distinguished from the versions that produced the reported outputs.
-
 ## Computational workflow
 
 ### 1. Network preparation
 
-Prepare generation specifications from the network structures, variable descriptions, and state labels. Keep the corresponding reference CPT exports identifiable for subsequent evaluation.
+Use the network and persona inputs in `data/`. The network specification defines the graph, variable descriptions, and ordered state labels. Reference CPTs remain part of the evaluation materials.
 
 ### 2. Confidence-guided CPT generation
 
-For each network–model pair, run control and P1–P3 using the corresponding generation notebook:
+For each network–model pair, use the corresponding generation notebook in `scripts/` and the matching inputs from `data/`. Run control and P1–P3:
 
 - Roots receive a direct FullDist request.
-- Conditional configurations receive a self-reported confidence score.
+- Each eligible conditional node receives one confidence-screening request covering all its parent configurations.
 - Configurations at or above 0.80 receive a direct FullDist request.
 - Successfully parsed direct rows become final CPT rows and fitting anchors.
 - Remaining conditional rows use the midpoint RNM approximation, fitted when anchors exist and completed with defaults otherwise.
 
-Preserve the raw response, parsing decision, accepted vector, and retry history. Influence directions and fitting parameters must remain associated with the node that used them.
+The generation package preserves the raw responses, parsing decisions, accepted vectors, retry history, influence directions, and fitting parameters. Keep the resulting ZIP in `data/`, identified by its network and model.
 
 ### 3. Persona pooling
 
@@ -154,11 +146,11 @@ Construct equal and configured weighted pools from P1–P3. Apply the seismic no
 
 ### 4. Alignment and evaluation
 
-Align generated and reference probabilities by node name, child-state name, and every parent name/state pair. Compute the same metrics for all 24 outputs and the corresponding uniform baselines.
+Use the evaluation notebook in `scripts/` with the matching generation ZIP. Align generated and reference probabilities by node name, child-state name, and every parent name/state pair. Compute the same metrics for all 24 outputs and the corresponding uniform baselines. Keep the evaluation ZIP in `data/` alongside its generation package.
 
 ### 5. Diagnostic analysis
 
-Produce route counts, root/conditional decompositions, smoothing sensitivity, boundary-probability counts, and response-audit records. Generate manuscript figures from the consolidated full-precision results.
+The [supplementary tables](online-resource/secondary-tables.md) report route counts, root/conditional decompositions, smoothing sensitivity, boundary-probability counts, and node contributions. The [response audit](online-resource/response-audit.md) connects selected numerical outputs to the original response wording.
 
 ## Evaluation
 
@@ -176,39 +168,35 @@ The default KL smoothing constant is `1e-8`. Sensitivity analysis uses `1e-10`, 
 
 For the uniform baseline, each child state receives probability `1/K`, where `K` is the node's number of states. The same alignment and evaluation settings apply to generated outputs and baselines.
 
-## Diagnostic outputs
+## Contents of the data packages
 
-The following tables provide the target machine-readable interface for the package:
+| Material | Package |
+| --- | --- |
+| Complete generated CPTs for control and P1–P3 | Generation ZIP |
+| Raw model responses, accepted/rejected parsing attempts, and retry records | Generation ZIP |
+| Row confidence, routing provenance, anchors, and RNM fitting parameters | Generation ZIP |
+| Reference CPTs and state-alignment information | Evaluation ZIP |
+| Individual-output and persona-pool metrics | Evaluation ZIP |
+| Errors by probability entry, CPT row, node, and construction source | Evaluation ZIP |
 
-| File in `results/` | Contents |
-|---|---|
-| `scores_all_outputs.csv` | All five metrics for the 24 outputs and network-specific uniform baselines. |
-| `aligned_probabilities.csv` | Reference and estimated probabilities with network, model, condition, run, node, child state, and parent configuration. |
-| `root_conditional_errors.csv` | Root and conditional error components for control, each persona, and both pools. |
-| `row_provenance.csv` | Construction history of the 16 primary generations: root FullDist, conditional FullDist, anchor-fitted RNM, or unanchored RNM. |
-| `routing_summary.csv` | Confidence-screening coverage, route counts, and anchor counts by network, model, condition, and node. |
-| `smoothing_sensitivity.csv` | Recomputed KL scores and uniform-baseline comparisons at each epsilon. |
-| `boundary_probabilities.csv` | Counts of zero/one probabilities before smoothing, including individual outputs and pools. |
-| `audit_cases.csv` | Audited response identifiers, classification, accepted tuples, and links to the relevant source records. |
-| `verification_report.csv` | Archived-versus-recomputed comparisons, numerical differences, and the tolerances used. |
-| `paper_artifact_map.csv` | Mapping of manuscript/supplement figures and tables to source data, analysis code, and generated outputs. |
+The Markdown documents present the detailed method and analyses, while the ZIP packages retain the corresponding computational records and machine-readable tables.
 
 Raw responses should remain available in their original textual form. Normalized CPTs alone cannot establish whether an accepted tuple agrees with the surrounding response.
 
-The detailed response audit described in the manuscript targets 27 accepted electric-vehicle FullDist responses containing zero or one. Its documentation should include the root case reported to account for 74.3% of one configuration's reference-weighted error: node and states, response excerpt, accepted/reference vectors, contribution in bits, and percentage denominator.
+The [response audit](online-resource/response-audit.md) examines 27 accepted electric-vehicle FullDist responses containing zero or one. It includes the Qwen3.5-4B/P3 ignition-source root case, whose accepted tuple contributes 74.35% of that condition's reference-weighted error, together with the original rejection excerpt, state order, accepted/reference vectors, and percentage denominator.
 
 ## Recomputing archived results
 
 The primary reproduction route evaluates the preserved outputs without requesting new LLM responses:
 
-1. Obtain the generation and evaluation archives associated with the manuscript version.
+1. Select the matching generation and evaluation ZIPs in `data/` for the network and model of interest.
 2. Recover the generated CPTs, matching references, configuration records, and row provenance.
 3. Reconstruct both persona pools and the uniform baselines.
-4. Run the evaluation and verification procedures using the recorded alignment and smoothing rules.
+4. Use the evaluation notebook and supporting scripts in `scripts/`, following the recorded alignment and smoothing rules. Provide the selected generation ZIP when the notebook requests its input.
 5. Compare archived and recomputed results and record numerical differences.
-6. Regenerate the consolidated tables, diagnostic outputs, and figures.
+6. Compare the resulting summaries with the [supplementary tables](online-resource/secondary-tables.md) and use the [methodological details](online-resource/methodological-details.md) to check metric and routing definitions.
 
-The package's notebooks and scripts should document their inputs, environment, execution order, and output paths before the package is released as reproducible. This README does not prescribe commands for scripts that have not yet been supplied.
+The notebooks document their dependencies and execution cells. Evaluation uses the preserved probabilities and reference network; it does not require new language-model responses.
 
 Generating new LLM outputs is a separate execution route. It requires the model dependencies and suitable inference hardware, and produces a new experimental realization. The archived seeds do not guarantee identical regeneration across model revisions, software environments, or hardware.
 
@@ -222,18 +210,6 @@ Generating new LLM outputs is a separate execution route. It requires the model 
 - Route error shares must be interpreted together with route counts and reference weights.
 
 Preserve a fixed package version corresponding to the manuscript. Extraction fixes, new model generations, changed thresholds, and revised completion procedures should be identified as subsequent versions, with an explicit record of which outputs and analyses changed.
-
-## Package assembly checklist
-
-- [ ] Upload the original generation and evaluation archives and record their checksums.
-- [ ] Add the notebooks associated with the reported runs and distinguish later revisions.
-- [ ] Export network specifications, references, prompts, configurations, and raw response records.
-- [ ] Add evaluation, pooling, diagnostic, and verification code with execution instructions.
-- [ ] Export the complete result tables and reproduce the manuscript figures.
-- [ ] Add the supplementary documentation and the detailed response-audit cases.
-- [ ] Document recoverable dependencies and limitations of historical regeneration.
-- [ ] Add the license texts and third-party attribution notices.
-- [ ] Verify the paper-to-artifact mapping and freeze the manuscript-associated release.
 
 ## Licensing
 
