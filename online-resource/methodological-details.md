@@ -6,23 +6,28 @@ This supplement describes the experimental design, confidence gate, Ranked Nodes
 
 The study evaluates two Bayesian networks from bnRep with two language models: **Qwen3.5-4B** and **Qwen3.5-9B**. The directed acyclic graph, variable definitions, state labels, and state ordering are specified before elicitation. Network structure is held fixed; the procedure estimates numerical parameters.
 
-| Network | Nodes | Edges | Root nodes | Conditional nodes | States per node | Root rows | Conditional rows | Total CPT rows | Probability entries |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| seismic | 10 | 12 | 4 | 6 | 3 | 4 | 78 | 82 | 246 |
-| electricvehicle | 23 | 22 | 15 | 8 | 2 | 15 | 64 | 79 | 158 |
+| Network | Nodes | Edges | Root nodes | Conditional nodes | States per node |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| seismic | 10 | 12 | 4 | 6 | 3 |
+| electricvehicle | 23 | 22 | 15 | 8 | 2 |
 
-A CPT row is one child-state distribution for a particular configuration of the parents. A root node contributes one unconditional row. For node $X_i$ with parent set $\mathrm{Pa}_i$, the number of rows is
+| Network | Root rows | Conditional rows | Total CPT rows | Probability entries |
+| --- | ---: | ---: | ---: | ---: |
+| seismic | 4 | 78 | 82 | 246 |
+| electricvehicle | 15 | 64 | 79 | 158 |
+
+A CPT row is one child-state distribution for a particular configuration of the parents. A root node contributes one unconditional row. For node Xᵢ with parent set Paᵢ, the number of rows is
 
 $$
 R_i=\prod_{X_j\in\mathrm{Pa}_i}K_j,
 $$
 
-where $K_j$ is the number of states of parent $X_j$ and the empty product is one. Define $N=\sum_i R_i$ as the number of rows and $M=\sum_i R_iK_i$ as the number of scalar probabilities in a complete network.
+where Kⱼ is the number of states of parent Xⱼ and the empty product is one. Define N = Σᵢ Rᵢ as the number of rows and M = Σᵢ RᵢKᵢ as the number of scalar probabilities in a complete network.
 
 Each network–model pair has four elicitation conditions: control and three domain personas. Each condition has **one primary generation**. Two additional outputs are obtained by pooling the three persona CPTs, giving six evaluated outputs per network–model pair, **16 primary generations and eight pooled outputs**, or 24 outputs overall. Pooling uses no additional model calls. A uniform CPT baseline is evaluated separately for each network.
 
 | Condition | seismic | electricvehicle |
-|---|---|---|
+| --- | --- | --- |
 | Control | Empty system instruction | Empty system instruction |
 | P1 | Structural engineer | Electric vehicle systems engineer |
 | P2 | Seismologist | Automotive fire safety and reliability specialist |
@@ -47,7 +52,7 @@ A separate preliminary query asks each model about familiarity with the named be
 Both model sizes use the same elicitation settings and RNM hyperparameters.
 
 | Setting | Value |
-|---|---|
+| --- | --- |
 | Model checkpoints | `Qwen/Qwen3.5-4B`; `Qwen/Qwen3.5-9B` |
 | Hardware | NVIDIA Tesla T4 |
 | Quantization | 4-bit NF4 with double quantization |
@@ -60,14 +65,14 @@ Both model sizes use the same elicitation settings and RNM hyperparameters.
 | Confidence threshold | 0.80 |
 
 | Request type | Decoding | Temperature | Top-p | Maximum new tokens | Maximum parsing attempts, including the first |
-|---|---|---:|---|---:|---:|
+| --- | --- | ---: | --- | ---: | ---: |
 | Confidence screen | Greedy | 0.0 | Not applied | 1,536 | 4 |
 | FullDist, initial attempt | Sampling | 0.1 | 1.0 | 2,048 | 5 total |
 | FullDist, subsequent attempts | Sampling | 0.1 | 1.0 | 4,096 | Within the same five-attempt limit |
 
 The preliminary familiarity query uses greedy decoding. Parameters such as top-k are not explicitly overridden by the generation wrapper and depend on the loaded model configuration. Disabling thinking mode in the chat template does not guarantee that the returned text contains no reasoning: the FullDist prompt explicitly requests reasoning followed by a final numerical tuple.
 
-Request-specific seeds are derived from the base seed and a SHA-256 hash of the user prompt, repetition index, parsing-attempt index, row-retry index, and generation-error attempt index. The first eight hexadecimal hash digits are converted to an integer, added to 42, and reduced modulo $2^{32}$. The system instruction is excluded from this seed material, allowing an otherwise identical question to receive the same seed across persona conditions. PyTorch and CUDA seeds are set before generation.
+Request-specific seeds are derived from the base seed and a SHA-256 hash of the user prompt, repetition index, parsing-attempt index, row-retry index, and generation-error attempt index. The first eight hexadecimal hash digits are converted to an integer, added to 42, and reduced modulo 2³². The system instruction is excluded from this seed material, allowing an otherwise identical question to receive the same seed across persona conditions. PyTorch and CUDA seeds are set before generation.
 
 The model wrapper separately allows up to five execution attempts per request, including the first. This mechanism handles execution errors and is distinct from retries caused by an unparseable response. The call counts in Section 5 refer to the recorded elicitation requests.
 
@@ -79,7 +84,7 @@ The loaded immutable model commit was not retained in the evaluated runs. Conseq
 
 For each eligible conditional node, one screening request covers all parent configurations. It asks for:
 
-1. A self-reported confidence $c_{ir}\in[0,1]$ for estimating each CPT row $r$ of node $i$.
+1. A self-reported confidence cᵢᵣ ∈ [0, 1] for estimating each CPT row r of node i.
 2. A qualitative influence direction for each parent: `positive`, `negative`, or `uncertain`, accompanied by a confidence value.
 
 Row confidence expresses the model's claimed knowledge for probability elicitation. It is distinct from an event probability and is not calibrated against reference error. The confidence parser requires every expected row index and parent exactly once, valid confidence values, and a permitted direction label.
@@ -88,7 +93,7 @@ The numerical confidence attached to a parent direction is recorded but does not
 
 ### 4.2. Routing rule
 
-For eligible conditional node $i$, define its selected row set using the fixed threshold $\tau=0.80$:
+For eligible conditional node i, define its selected row set using the fixed threshold τ = 0.80:
 
 $$
 \mathcal{A}_i=\{r:c_{ir}\geq\tau\}.
@@ -110,14 +115,14 @@ The procedure for one eligible conditional node is: screen all configurations, e
 
 ## 5. FullDist parsing, retries, and accepted outputs
 
-FullDist asks for reasoning followed by a final tuple in the specified state order. Numerical acceptance requires a distribution of the expected length, finite entries in $[0,1]$, and a positive total. Accepted entries are normalized by their sum. Exact zeros and ones are retained at this stage; KL smoothing is applied only during evaluation.
+FullDist asks for reasoning followed by a final tuple in the specified state order. Numerical acceptance requires a distribution of the expected length, finite entries in [0, 1], and a positive total. Accepted entries are normalized by their sum. Exact zeros and ones are retained at this stage; KL smoothing is applied only during evaluation.
 
 Retrying seeks a parsable distribution and does not use agreement with the reference as an acceptance criterion. In the seismic runs, retries repeat the original prompt. In the electric-vehicle runs, second attempts append a clarification that requests a subjective prior, acknowledges the absence of empirical frequencies, and requires a final numerical tuple. Every electric-vehicle request was completed within two parsing attempts. The exact wording is provided with the [prompt templates](prompts.md).
 
 The generation implementation accompanying this supplement repeats the base prompt on a parsing retry; reproducing the evaluated electric-vehicle procedure also requires the domain-specific clarification. Its final-answer extractor prioritizes explicit conclusion markers, a standalone final tuple, or state-labeled final probabilities. These extraction rules should not be assumed to reproduce every historical parser decision: the evaluated outputs include an electric-vehicle root distribution extracted from a tuple that the surrounding response rejected as an estimate. Numerical validity alone does not establish semantic endorsement by the model. Reprocessing responses with stricter extraction rules constitutes a new analysis.
 
 | Network | Model | Confidence requests | Accepted FullDist rows | Additional FullDist attempts | Total FullDist requests | Highest FullDist parsing attempt |
-|---|---|---:|---:|---:|---:|---:|
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
 | seismic | Qwen3.5-4B | 24 | 19 | 5 | 24 | 3 |
 | seismic | Qwen3.5-9B | 24 | 69 | 1 | 70 | 2 |
 | electricvehicle | Qwen3.5-4B | 32 | 62 | 21 | 83 | 2 |
@@ -132,13 +137,13 @@ No final row in the evaluated outputs is labeled as a uniform error fallback. An
 
 ### 6.1. Ordinal encoding and aggregation
 
-For a parent with $K_j$ ordered states, state index $s\in\{0,\ldots,K_j-1\}$ is represented by its interval midpoint:
+For a parent with Kⱼ ordered states, state index s ∈ {0, …, Kⱼ − 1} is represented by its interval midpoint:
 
 $$
 z_j(s)=\frac{s+\tfrac12}{K_j}.
 $$
 
-For parent $j$ and configuration $r$, the signed input is
+For parent j and configuration r, the signed input is
 
 $$
 x_{jr}=
@@ -155,11 +160,11 @@ $$
 \qquad w_{ij}\geq0,\qquad\sum_{j=1}^{m_i}w_{ij}=1,
 $$
 
-where $m_i$ is the number of parents. Parent weights, signs, and dispersion are shared across the rows of a node.
+where mᵢ is the number of parents. Parent weights, signs, and dispersion are shared across the rows of a node.
 
 ### 6.2. Discretizing the truncated normal
 
-For a child with $K_i$ ordered states, define boundaries $b_k=k/K_i$, for $k=0,\ldots,K_i$. RNM integrates a normal distribution with location $\mu_{ir}$ and standard deviation $\sigma_i$, truncated to $[0,1]$:
+For a child with Kᵢ ordered states, define boundaries bₖ = k/Kᵢ, for k = 0, …, Kᵢ. RNM integrates a normal distribution with location μᵢᵣ and standard deviation σᵢ, truncated to [0, 1]:
 
 $$
 q_{ir,k}=
@@ -172,13 +177,13 @@ q_{ir,k}=
 },\qquad k=0,\ldots,K_i-1.
 $$
 
-Here $\Phi$ is the standard normal cumulative distribution function. The implementation clips $\mu$ to $[0,1]$ and $\sigma$ to its permitted interval, floors the resulting probabilities at $10^{-12}$, and renormalizes. If the truncation denominator is nonfinite or no larger than $10^{-12}$, it returns a uniform distribution as a numerical safeguard.
+Here Φ is the standard normal cumulative distribution function. The implementation clips μ to [0, 1] and σ to its permitted interval, floors the resulting probabilities at 10⁻¹², and renormalizes. If the truncation denominator is nonfinite or no larger than 10⁻¹², it returns a uniform distribution as a numerical safeguard.
 
 The weighted-mean form constrains the CPTs that RNM can express. Marking binary event variables as ordinal does not establish that their interactions, necessity relations, or fault mechanisms follow this aggregation rule.
 
 ### 6.3. Fitting to anchors
 
-When $\mathcal{A}_i$ is nonempty, RNM is fitted to the accepted FullDist distributions using confidence-weighted squared Hellinger distance:
+When the anchor set is nonempty, RNM is fitted to the accepted FullDist distributions using confidence-weighted squared Hellinger distance:
 
 $$
 H^2(\mathbf a,\mathbf q)=\frac12\sum_k(\sqrt{a_k}-\sqrt{q_k})^2,
@@ -195,19 +200,19 @@ $$
 The regularizer favors equal parent weights. The anchors are model-generated estimates, so fitting measures consistency with those estimates rather than calibration to the reference network.
 
 | RNM setting | Value |
-|---|---|
-| Default and initial standard deviation | $\sigma_0=0.16$ |
-| Standard-deviation bounds | $[0.03,0.45]$ |
-| Weight regularization | $\lambda=0.02$ |
+| --- | --- |
+| Default and initial standard deviation | σ₀ = 0.16 |
+| Standard-deviation bounds | [0.03, 0.45] |
+| Weight regularization | λ = 0.02 |
 | Weight parameterization | Softmax of one logit per parent |
-| Logit bounds | $[-6,6]$ |
+| Logit bounds | [−6, 6] |
 | Initial logits | All zero, producing equal weights |
-| Dispersion parameterization | Optimize $\log\sigma$ within the log-transformed bounds |
+| Dispersion parameterization | Optimize log σ within the log-transformed bounds |
 | Optimizer | L-BFGS-B |
 | Maximum iterations | 500 per candidate direction pattern |
-| Numerical probability floor | $10^{-12}$ |
+| Numerical probability floor | 10⁻¹² |
 
-Direction signs are taken from the confidence screen unless there are at least $\max(2,m_i+1)$ anchors and at most six parents. When both conditions hold, all $2^{m_i}$ sign combinations are evaluated, fitting weights and dispersion separately for each. The candidate with the smallest regularized loss is retained; an improvement must exceed $10^{-12}$ to replace the current candidate.
+Direction signs are taken from the confidence screen unless there are at least max(2, mᵢ + 1) anchors and at most six parents. When both conditions hold, all possible parent-sign combinations are evaluated, fitting weights and dispersion separately for each. The candidate with the smallest regularized loss is retained; an improvement must exceed 10⁻¹² to replace the current candidate.
 
 An optimizer warning is recorded with the returned parameters; it does not automatically trigger replacement by default parameters. All 28 anchor-based node fits in the evaluated outputs report successful optimization. Of these, 18 have every row directly elicited, so their fitted parameters supply no completed rows. The remaining ten fits supply 32 RNM rows.
 
@@ -226,7 +231,7 @@ with directions obtained from the screen using the sign mapping in Section 4. Th
 The following counts aggregate the four primary conditions within each network–model pair. Pooled outputs are excluded because they combine constituent rows.
 
 | Network | Model | Root FullDist | Conditional FullDist | RNM with anchors | RNM without anchors |
-|---|---|---:|---:|---:|---:|
+| --- | --- | ---: | ---: | ---: | ---: |
 | seismic | Qwen3.5-4B | 16 | 3 | 0 | 309 |
 | seismic | Qwen3.5-9B | 16 | 53 | 4 | 255 |
 | electricvehicle | Qwen3.5-4B | 60 | 2 | 6 | 248 |
@@ -237,7 +242,7 @@ Among the **1,136 conditional rows**, 10.6% are directly elicited, 2.8% are comp
 
 ## 7. Persona pooling
 
-Pooling is performed separately within each network–model pair, after all three persona generations are complete. For aligned row distributions $\widehat{\mathbf p}^{(a)}_{ir}$ from personas $a\in\{1,2,3\}$, the linear pool is
+Pooling is performed separately within each network–model pair, after all three persona generations are complete. For each aligned row, the linear pool combines the three persona distributions. The persona index a takes values 1, 2, and 3:
 
 $$
 \widehat p^{\mathrm{pool}}_{ir,k}
@@ -245,10 +250,10 @@ $$
 \qquad\alpha_{ia}\geq0,\qquad\sum_a\alpha_{ia}=1.
 $$
 
-The control condition is excluded. Equal pooling uses $\alpha_{ia}=1/3$. Configured pooling uses the weights below, normalized at each node and held constant across that node's rows and child states.
+The control condition is excluded. Equal pooling assigns one-third of the weight to each persona. Configured pooling uses the weights below, normalized at each node and held constant across that node's rows and child states.
 
 | Network and nodes | P1 | P2 | P3 |
-|---|---:|---:|---:|
+| --- | ---: | ---: | ---: |
 | seismic, except the overrides below | 0.50 | 0.30 | 0.20 |
 | seismic, SeismicHazard | 0.15 | 0.70 | 0.15 |
 | seismic, Fragility | 0.70 | 0.10 | 0.20 |
@@ -268,11 +273,11 @@ This is consequential for electricvehicle: generation uses `no, yes`, whereas th
 
 ## 9. Primary metrics
 
-Let $\mathbf p_{ir}$ be an aligned reference row and $\widehat{\mathbf p}_{ir}$ the corresponding estimated row. All five primary error measures are better when smaller. KL uses base-2 logarithms and is reported in bits.
+In the equations below, p denotes an aligned reference row and p with a hat denotes the corresponding estimated row. Subscripts identify the node, parent configuration, and child state. All five primary error measures are better when smaller. KL uses base-2 logarithms and is reported in bits.
 
 ### 9.1. Smoothing and row KL
 
-For KL calculations, each row is first normalized to unit sum. With normalized entries $p^\circ_{ir,k}$ and $\widehat p^\circ_{ir,k}$, define
+For KL calculations, each row is first normalized to unit sum. The superscript circle below denotes this normalization. Reference and estimated entries are then smoothed as follows:
 
 $$
 \widetilde p_{ir,k}
@@ -290,7 +295,7 @@ d_{ir}=\sum_{k=0}^{K_i-1}\widetilde p_{ir,k}
 \log_2\frac{\widetilde p_{ir,k}}{\widetilde{\widehat p}_{ir,k}}.
 $$
 
-Smoothing is symmetric in its application to both input rows; the divergence itself remains directional, from reference to estimate. RNM's $10^{-12}$ probability floor and evaluation's $10^{-8}$ smoothing serve different purposes.
+Smoothing is symmetric in its application to both input rows; the divergence itself remains directional, from reference to estimate. RNM's 10⁻¹² probability floor and evaluation's 10⁻⁸ smoothing serve different purposes.
 
 ### 9.2. Mean CPT KL
 
@@ -303,7 +308,13 @@ Every row has equal weight, including roots. This is a mean over rows, not an eq
 
 ### 9.3. Reference-weighted BN KL score
 
-Define $\omega_{ir}=P_{\mathrm{ref}}(\mathrm{Pa}_i=r)$, with $\omega_{ir}=1$ for a root. The reported score is
+The weight of a parent configuration is its probability under the reference network:
+
+$$
+\omega_{ir}=P_{\mathrm{ref}}(\mathrm{Pa}_i=r).
+$$
+
+For a root node, the weight is one. The reported score is
 
 $$
 \mathrm{BN\ KL}_{\mathrm{weighted}}
@@ -341,13 +352,13 @@ $$
 \mathrm{TV}_{\mathrm{mean}}=\frac1N\sum_i\sum_{r=1}^{R_i}\mathrm{TV}_{ir}.
 $$
 
-TV measures row-level discrepancy and receives no epsilon smoothing. Since each network has the same cardinality $K$ at every node, $\mathrm{TV}_{\mathrm{mean}}=(K/2)\mathrm{MAE}$. Thus mean TV equals MAE for electricvehicle and equals $1.5\times\mathrm{MAE}$ for seismic; these are not independent findings within either network.
+TV measures row-level discrepancy and receives no epsilon smoothing. Since each network has the same cardinality K at every node, (K/2) × MAE is the mean TV. Thus mean TV equals MAE for electricvehicle and equals 1.5 × MAE for seismic; these are not independent findings within either network.
 
 ### 9.6. Uniform baseline and smoothing sensitivity
 
-The uniform baseline assigns $1/K_i$ to every child state in every row while preserving the graph and state labels. It uses the same alignment, KL smoothing, and reference parent-marginal weights as the elicited outputs.
+The uniform baseline assigns 1/Kᵢ to every child state in every row while preserving the graph and state labels. It uses the same alignment, KL smoothing, and reference parent-marginal weights as the elicited outputs.
 
-The epsilon-sensitivity analysis repeats KL evaluation for $\epsilon\in\{10^{-10},10^{-8},10^{-6},10^{-4}\}$ while holding elicited probabilities, pooling weights, and reference parent marginals fixed. This tests the effect of smoothing, particularly near zero probabilities; it does not repeat elicitation or alter confidence routing.
+The epsilon-sensitivity analysis repeats KL evaluation for ε ∈ {10⁻¹⁰, 10⁻⁸, 10⁻⁶, 10⁻⁴} while holding elicited probabilities, pooling weights, and reference parent marginals fixed. This tests the effect of smoothing, particularly near zero probabilities; it does not repeat elicitation or alter confidence routing.
 
 Additional summaries include median and upper-quantile row errors, maximum absolute error, squared error, Hellinger distance, Jensen–Shannon divergence, and fractions of scalar probabilities within specified error tolerances. These supplement the five primary metrics. The fitting objective uses **squared** Hellinger distance, whereas the supplementary evaluation summary reports Hellinger distance itself.
 
@@ -355,7 +366,7 @@ Additional summaries include median and upper-quantile row errors, maximum absol
 
 For each primary generation, rows are assigned to four mutually exclusive sources: root FullDist, conditional FullDist, RNM with anchors, and RNM without anchors. The last two categories are distinguished using the node's anchor count.
 
-For source $s$, its contribution to the reference-weighted KL score is
+For source s, its contribution to the reference-weighted KL score is
 
 $$
 E_s=\sum_{(i,r):\rho_{ir}=s}\omega_{ir}d_{ir},
@@ -363,13 +374,13 @@ E_s=\sum_{(i,r):\rho_{ir}=s}\omega_{ir}d_{ir},
 S_s=100\frac{E_s}{\sum_tE_t}.
 $$
 
-The percentage $S_s$ is a share of total weighted error. It differs from the fraction of rows assigned to that source and from its mean error per row. If total error is zero, percentage shares are undefined.
+The percentage Sₛ is a share of total weighted error. It differs from the fraction of rows assigned to that source and from its mean error per row. If total error is zero, percentage shares are undefined.
 
 Root and conditional contributions can also be summed separately; together they equal the full weighted score. Such decompositions show where error accumulates. They do not establish a causal performance advantage of one route, because direct elicitation and RNM operate on different rows selected by the confidence gate.
 
 ## 11. Numerical consistency and interpretation
 
-The five primary metrics were recomputed for all 24 outputs from the aligned reference and estimated probabilities, using the recorded reference parent-marginal weights. The maximum absolute discrepancy from the reported scores was below $5\times10^{-10}$. Both pooling schemes agree with their constituent weighted sums to within $2\times10^{-16}$. All 1,016 RNM-completed rows were also reconstructed from their stored weights, directions, dispersion, and parent states, matching the recorded values at the available floating-point precision. These checks establish computational consistency, not semantic correctness of accepted model responses or empirical calibration.
+The five primary metrics were recomputed for all 24 outputs from the aligned reference and estimated probabilities, using the recorded reference parent-marginal weights. The maximum absolute discrepancy from the reported scores was below 5 × 10⁻¹⁰. Both pooling schemes agree with their constituent weighted sums to within 2 × 10⁻¹⁶. All 1,016 RNM-completed rows were also reconstructed from their stored weights, directions, dispersion, and parent states, matching the recorded values at the available floating-point precision. These checks establish computational consistency, not semantic correctness of accepted model responses or empirical calibration.
 
 The experimental unit is a complete generation for a network–model–condition combination. Rows, parsing attempts, personas, and deterministic pools do not provide independent repeated generations. With one primary generation per condition, the reported comparisons are descriptive and do not estimate run-to-run uncertainty or support significance tests across random seeds.
 
