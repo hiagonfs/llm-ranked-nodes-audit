@@ -17,7 +17,7 @@ The supplementary documentation is organized into four Markdown documents in `on
 | [secondary-tables.md](online-resource/secondary-tables.md) | Complete scores, supplementary metrics, root/conditional decompositions, routing counts, node contributions, and smoothing sensitivity. |
 | [response-audit.md](online-resource/response-audit.md) | Inspection protocol and 27 case records, with original excerpts, accepted/reference vectors, generation parameters, classifications, and error contributions. |
 
-Generation and evaluation ZIPs, network specifications, and persona inputs are grouped by network and model in `data/`. The five executable notebooks are grouped in `scripts/`. Their documentation and internal identifiers are in English; runtime messages, exported column names, report text, and data formats remain in Portuguese for compatibility with the archived outputs.
+Generation and evaluation ZIPs, network specifications, and persona inputs are grouped by network and model in `data/`. The five executable notebooks are grouped in `scripts/`. The notebooks use Portuguese field names, runtime messages, and report text.
 
 ## Repository layout
 
@@ -247,7 +247,7 @@ The default evaluator uses `EPS_KL = 1e-8`. The four-value sensitivity analysis 
 3. Download and identify the resulting package with the selected epsilon before proceeding to the next value. The evaluator reuses its output directory, so later runs overwrite newly computed reports there.
 4. Keep the generated CPTs, state alignment, reference BIF, and reference parent-configuration weights fixed across the four values.
 
-The supplementary Markdown tables additionally organize routing, root/conditional decompositions, node contributions, and response-audit findings. The five notebooks do not provide a single command that regenerates every supplementary table or reproduces the human interpretation of response excerpts.
+The evaluator exports per-generation metrics. Further aggregations of routing, root/conditional errors, and node contributions are presented in the supplementary tables. Response classifications follow the manual inspection protocol in the response audit.
 
 ### Generating new LLM outputs
 
@@ -255,7 +255,7 @@ Use the matching generation notebook, a CUDA GPU runtime, and the network/person
 
 New generation produces a new experimental realization. The archived seeds do not guarantee identical outputs across checkpoint revisions, software environments, or hardware. The current seismic notebooks repeat the base FullDist prompt on retry. The electric-vehicle notebooks already include the subjective-prior clarification on the second attempt, an additional symmetric-prior clarification from the third attempt, and explicit fallback metadata if all attempts fail. The evaluated electric-vehicle runs completed within two parsing attempts and contain no final uniform error-fallback rows.
 
-The [prompt templates](online-resource/prompts.md), [methodological details](online-resource/methodological-details.md), archived accepted vectors, and raw responses identify the evaluated procedure. Reprocessing a historical response or applying a newer parser is a separate analysis; it must not silently replace the archived values.
+The [prompt templates](online-resource/prompts.md), [methodological details](online-resource/methodological-details.md), archived accepted vectors, and raw responses identify the evaluated procedure. Results obtained by reprocessing historical responses with a different parser should be reported separately from the archived results.
 
 ## Interpretation and versioning
 
@@ -270,6 +270,6 @@ Preserve a fixed package version corresponding to the manuscript. Extraction fix
 
 ## Licensing
 
-This project uses the **MIT License**. See [LICENSE](LICENSE) for the license text covering the project's original code and authored documentation and supplementary material.
+This repository is distributed under the [MIT License](LICENSE).
 
 Imported reference networks, model checkpoints, and third-party dependencies retain their applicable original licenses and attribution requirements. Retain attribution to bnRep and the publications underlying the reference networks.
