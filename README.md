@@ -17,23 +17,34 @@ The supplementary documentation is organized into four Markdown documents in `on
 | [secondary-tables.md](online-resource/secondary-tables.md) | Complete scores, supplementary metrics, root/conditional decompositions, routing counts, node contributions, and smoothing sensitivity. |
 | [response-audit.md](online-resource/response-audit.md) | Inspection protocol and 27 case records, with original excerpts, accepted/reference vectors, generation parameters, classifications, and error contributions. |
 
-Generation and evaluation ZIPs, network specifications, and persona inputs are grouped in `data/`. Scripts and notebooks are grouped in `scripts/`.
+Generation and evaluation ZIPs, network specifications, and persona inputs are grouped by network and model in `data/`. The five executable notebooks are grouped in `scripts/`. Their documentation and internal identifiers are in English; runtime messages, exported column names, report text, and data formats remain in Portuguese for compatibility with the archived outputs.
 
 ## Repository layout
 
-The repository uses three directories:
+The repository uses three top-level directories:
 
 | Directory | Contents |
 | --- | --- |
 | `data/` | Generation and evaluation ZIPs for each network–model pair, together with network and persona input specifications. |
-| `scripts/` | Generation and evaluation notebooks and supporting Python scripts. |
+| `scripts/` | Four generation notebooks and one shared evaluation notebook. |
 | `online-resource/` | The four linked Markdown documents containing prompts, methodological details, supplementary tables, and the response audit. |
 
 `README.md` and `LICENSE` are kept at the repository root.
 
-Each network–model pair has two ZIP packages: **generation results** and **evaluation results**. For two networks and two model sizes, this gives four pairs and eight ZIPs. Their names identify the network, model, and package type. Network and persona inputs shared by both models can be stored once per network.
+Each network–model pair has its own directory, `data/<network>/qwen-<size>/`, containing two ZIP packages (**generation results** and **evaluation results**) and the matching network/persona JSON inputs. The four pairs provide eight ZIPs. Within each network, the two model directories contain identical copies of the input specifications.
 
 The ZIPs preserve their internal organization, including complete CPTs, raw generation records, references, and evaluation tables. The three repository directories group these materials without requiring separate directories for every type of output.
+
+## Notebook entry points
+
+| Network | Model | Inputs and archived outputs | Generation notebook | Google Colab |
+| --- | --- | --- | --- | --- |
+| seismic | Qwen3.5-4B | [Data](data/seismic/qwen-4b/) | [Generation](scripts/Qwen35_4B_01_Generate_CPTs_Confidence_RankedNodes.ipynb) | [Open](https://colab.research.google.com/github/hiagonfs/llm-ranked-nodes-audit/blob/main/scripts/Qwen35_4B_01_Generate_CPTs_Confidence_RankedNodes.ipynb) |
+| seismic | Qwen3.5-9B | [Data](data/seismic/qwen-9b/) | [Generation](scripts/Qwen35_9B_01_Generate_CPTs_Confidence_RankedNodes.ipynb) | [Open](https://colab.research.google.com/github/hiagonfs/llm-ranked-nodes-audit/blob/main/scripts/Qwen35_9B_01_Generate_CPTs_Confidence_RankedNodes.ipynb) |
+| electricvehicle | Qwen3.5-4B | [Data](data/electricvehicle/qwen-4b/) | [Generation](scripts/Qwen35_4B_01_ElectricVehicle_ConfidenceRankedNodes.ipynb) | [Open](https://colab.research.google.com/github/hiagonfs/llm-ranked-nodes-audit/blob/main/scripts/Qwen35_4B_01_ElectricVehicle_ConfidenceRankedNodes.ipynb) |
+| electricvehicle | Qwen3.5-9B | [Data](data/electricvehicle/qwen-9b/) | [Generation](scripts/Qwen35_9B_01_ElectricVehicle_ConfidenceRankedNodes.ipynb) | [Open](https://colab.research.google.com/github/hiagonfs/llm-ranked-nodes-audit/blob/main/scripts/Qwen35_9B_01_ElectricVehicle_ConfidenceRankedNodes.ipynb) |
+
+All four pairs use the same [evaluation notebook](scripts/Qwen35_02_Evaluate_ConfidenceRankedNodes_bnRep.ipynb), also available [in Google Colab](https://colab.research.google.com/github/hiagonfs/llm-ranked-nodes-audit/blob/main/scripts/Qwen35_02_Evaluate_ConfidenceRankedNodes_bnRep.ipynb). Re-evaluating archived outputs uses a **CPU runtime**. Generating new model responses requires a **CUDA GPU runtime**.
 
 ## Study design
 
@@ -120,13 +131,21 @@ The manuscript reports the following settings for the archived generations:
 | Weight regularization | 0.02 toward equal parent weights |
 | Optimization | L-BFGS-B; up to 500 iterations |
 
-Some inherited decoding defaults and exact loaded model commits were not recorded. Generation and evaluation dependencies should be documented separately from recoverable execution records. A newly installed environment should be identified as a new environment rather than presented as the exact historical setup.
+Some inherited decoding defaults and exact loaded model commits were not recorded. The notebooks install dependencies in their setup cells; these cells use version ranges and, for generation, the current Transformers source rather than a fully pinned historical environment. Record the installed versions for a new execution. The archived reference-export records identify bnRep `0.0.6`, bnlearn `5.2.1`, and R `4.6.1`. Reusing the archived BIF avoids retrieving a newer reference. A newly installed environment is a new execution environment, not a recovery of the exact historical setup.
 
 ## Computational workflow
 
 ### 1. Network preparation
 
-Use the network and persona inputs in `data/`. The network specification defines the graph, variable descriptions, and ordered state labels. Reference CPTs remain part of the evaluation materials.
+Use the network and persona inputs from the same network–model directory in `data/`. The network specification defines the graph, variable descriptions, and ordered state labels. Reference CPTs remain part of the evaluation materials.
+
+For a new seismic generation, upload `rede_sismica_framework.json` and `personas.json` to Colab and set the network path in the input cell to:
+
+```python
+CAMINHO_REDE_MANUAL = Path('/content/rede_sismica_framework.json')
+```
+
+The electric-vehicle notebooks already expect `/content/electricvehicle.json`. All generation notebooks expect `/content/personas.json`. These files are uploaded manually to the runtime; Google Drive is not required.
 
 ### 2. Confidence-guided CPT generation
 
@@ -146,7 +165,7 @@ Construct equal and configured weighted pools from P1–P3. Apply the seismic no
 
 ### 4. Alignment and evaluation
 
-Use the evaluation notebook in `scripts/` with the matching generation ZIP. Align generated and reference probabilities by node name, child-state name, and every parent name/state pair. Compute the same metrics for all 24 outputs and the corresponding uniform baselines. Keep the evaluation ZIP in `data/` alongside its generation package.
+Use the shared evaluation notebook with the matching generation ZIP and the BIF from its archived evaluation package. Alignment uses the node name, child-state name, and every parent name/state pair. For each pair, the evaluator computes the four individual conditions and two persona pools, giving 24 outputs across the study. The uniform baseline requires the additional cell described below. Keep each newly computed evaluation package separate from the archived package when checking differences.
 
 ### 5. Diagnostic analysis
 
@@ -189,16 +208,54 @@ The [response audit](online-resource/response-audit.md) examines 27 accepted ele
 
 The primary reproduction route evaluates the preserved outputs without requesting new LLM responses:
 
-1. Select the matching generation and evaluation ZIPs in `data/` for the network and model of interest.
-2. Recover the generated CPTs, matching references, configuration records, and row provenance.
-3. Reconstruct both persona pools and the uniform baselines.
-4. Use the evaluation notebook and supporting scripts in `scripts/`, following the recorded alignment and smoothing rules. Provide the selected generation ZIP when the notebook requests its input.
-5. Compare archived and recomputed results and record numerical differences.
-6. Compare the resulting summaries with the [supplementary tables](online-resource/secondary-tables.md) and use the [methodological details](online-resource/methodological-details.md) to check metric and routing definitions.
+1. Choose a network–model directory from the table above and download its generation and evaluation ZIPs.
+2. Extract the **evaluation ZIP locally** and locate `referencia_bnrep/<network>.bif`. Keep the generation ZIP intact for the notebook's upload cell.
+3. Open the shared evaluation notebook in Colab and select a **CPU runtime**. Run the dependency cell.
+4. When prompted, upload **the generation ZIP and the archived BIF together**. The optional BIF input reuses the exact reference snapshot; otherwise the notebook retrieves a reference through R/bnRep.
+5. Run the remaining cells in order. They validate the inputs, export the complete CPT CSVs, align state and parent labels, compute the four individual outputs and two pools, and produce evaluation reports.
+6. Inspect the alignment audit. Its maximum probability difference must be within `1e-10`. Compare `comparacao_geral.csv` and the detailed reports with the archived results and the [supplementary tables](online-resource/secondary-tables.md).
+7. Before the final ZIP cell, calculate the uniform baseline if required. Then run the final packaging/download cell and preserve the newly computed package separately.
 
-The notebooks document their dependencies and execution cells. Evaluation uses the preserved probabilities and reference network; it does not require new language-model responses.
+Each pair produces four individual complete-CPT CSVs and a consolidated CSV under `tabelas_cpt_completas/`. Results and reports use the original Portuguese schemas. No model weights, GPU, Transformers installation, or new LLM responses are required for this route. R is unnecessary when the archived BIF is supplied.
 
-Generating new LLM outputs is a separate execution route. It requires the model dependencies and suitable inference hardware, and produces a new experimental realization. The archived seeds do not guarantee identical regeneration across model revisions, software environments, or hardware.
+### Uniform baseline
+
+The evaluator defines `uniform_cpds` but does not automatically add the baseline to its standard comparison tables. After running the evaluation and before packaging the results, run this additional Colab cell:
+
+```python
+reference_path = BIF_REFERENCIA or (
+    DIR_AVALIACAO / 'referencia_bnrep' / f'{NOME_REDE_BNREP}.bif'
+)
+reference = BIFReader(str(reference_path)).get_model()
+uniform_model = uniform_cpds(reference)
+_, _, baseline_metrics = summarize_metrics(reference, uniform_model)
+baseline_table = pd.DataFrame([{'rede': NOME_REDE_BNREP, **baseline_metrics}])
+baseline_table.to_csv(
+    DIR_AVALIACAO / 'baseline_uniforme.csv', index=False, encoding='utf-8-sig'
+)
+display(baseline_table)
+```
+
+The reference network determines this baseline, so its scores are the same for both model sizes within a network. The baseline is exported separately; it is not inserted into the evaluator's six-condition audit.
+
+### KL smoothing sensitivity
+
+The default evaluator uses `EPS_KL = 1e-8`. The four-value sensitivity analysis is not run automatically. To repeat it:
+
+1. Set `EPS_KL` in the **Metrics** cell to one of `1e-10`, `1e-8`, `1e-6`, or `1e-4`.
+2. Run the **entire Metrics cell again**, then rerun the evaluation and, when needed, the uniform-baseline cell. Changing the global variable alone does not update the existing default argument of `kl_bits`.
+3. Download and identify the resulting package with the selected epsilon before proceeding to the next value. The evaluator reuses its output directory, so later runs overwrite newly computed reports there.
+4. Keep the generated CPTs, state alignment, reference BIF, and reference parent-configuration weights fixed across the four values.
+
+The supplementary Markdown tables additionally organize routing, root/conditional decompositions, node contributions, and response-audit findings. The five notebooks do not provide a single command that regenerates every supplementary table or reproduces the human interpretation of response excerpts.
+
+### Generating new LLM outputs
+
+Use the matching generation notebook, a CUDA GPU runtime, and the network/persona inputs listed above. Execute its installation, input, and generation cells in order. For a comparison using NF4 across models, set `QWEN_QUANTIZACAO=4bit` in the environment before running the main configuration cell. Each completed run can be downloaded with the notebook's final ZIP cell.
+
+New generation produces a new experimental realization. The archived seeds do not guarantee identical outputs across checkpoint revisions, software environments, or hardware. The current seismic notebooks repeat the base FullDist prompt on retry. The electric-vehicle notebooks already include the subjective-prior clarification on the second attempt, an additional symmetric-prior clarification from the third attempt, and explicit fallback metadata if all attempts fail. The evaluated electric-vehicle runs completed within two parsing attempts and contain no final uniform error-fallback rows.
+
+The [prompt templates](online-resource/prompts.md), [methodological details](online-resource/methodological-details.md), archived accepted vectors, and raw responses identify the evaluated procedure. Reprocessing a historical response or applying a newer parser is a separate analysis; it must not silently replace the archived values.
 
 ## Interpretation and versioning
 
@@ -213,12 +270,6 @@ Preserve a fixed package version corresponding to the manuscript. Extraction fix
 
 ## Licensing
 
-The intended licensing arrangement is:
+This project uses the **MIT License**. See [LICENSE](LICENSE) for the license text covering the project's original code and authored documentation and supplementary material.
 
-| Material | License |
-|---|---|
-| Original project code, scripts, and notebook code | [MIT](https://opensource.org/license/mit) |
-| Original documentation, figures, and authored supplementary material | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
-| Imported networks, reference data, and other third-party material | Their applicable original licenses and attribution requirements |
-
-Include the applicable license texts and identify their scope when assembling the package. Retain source attribution for bnRep and the publications underlying the reference networks.
+Imported reference networks, model checkpoints, and third-party dependencies retain their applicable original licenses and attribution requirements. Retain attribution to bnRep and the publications underlying the reference networks.
