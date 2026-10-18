@@ -1,14 +1,12 @@
-# Prompt Templates and Archived Messages
+# Prompt Templates
 
-This document accompanies **“Confidence-Guided Bayesian Network Elicitation with LLMs and Ranked Nodes.”** It records the prompts used for `seismic` and `electricvehicle` with Qwen3.5-4B and Qwen3.5-9B, including control, three domain personas, confidence screening, FullDist elicitation, and the retry variants present in the generation archives.
+The elicitation protocol uses Qwen3.5-4B and Qwen3.5-9B to construct conditional probability tables for the seismic and electric-vehicle networks. Each network–model pair is evaluated under a control condition and three domain-specific personas.
 
-The authoritative evidence is the text stored in the four original generation ZIPs: `system_prompt` and `prompt` in the JSONL call logs, together with `personas_original.json` and `rede_original.json`. The supplied generation notebooks were used to recover and cross-check the common text builders. Generation and evaluation outputs were not modified while preparing this document.
-
-**Version scope:** the provided notebooks and historical call logs differ in their electric-vehicle retry behavior. Section 7 preserves the messages actually sent in the archived runs and identifies that difference. The prompt bodies below retain their original English wording, punctuation, state names, and requested answer formats.
+The following sections present the system instructions, confidence-screening and FullDist templates, retry instructions, and complete examples of the messages used in the study. Each example is identified by its model, network, prompting condition, and generation parameters. Prompt wording and state ordering are reproduced as used during elicitation.
 
 ## 1. Reading the templates
 
-Text blocks labeled **template** use angle-bracket placeholders such as `<NODE_NAME>` to describe values filled by the generation code. These placeholders are documentation notation and were not sent literally. Blocks labeled **archived message** contain the complete recorded message without placeholder substitution or ellipses.
+Text blocks labeled **template** use angle-bracket placeholders such as `<NODE_NAME>` to describe values filled by the generation code. These placeholders are documentation notation and were not sent literally. Blocks labeled **example message** contain the complete message used in the corresponding condition.
 
 | Placeholder | Expansion |
 |---|---|
@@ -19,16 +17,16 @@ Text blocks labeled **template** use angle-bracket placeholders such as `<NODE_N
 | `<PARENT_NAMES>` | Parent identifiers joined with comma and space. |
 | `<INDEXED_PARENT_CONFIGURATIONS>` | One zero-based indexed configuration per line, with assignments written as `Parent=State`. |
 | `<LAST_ROW_INDEX>` | Number of parent configurations minus one. |
-| `<ROLE>`, `<SPECIALTY>`, `<PERSONA_INSTRUCTIONS>` | Values from `papel`, `especialidade`, and `instrucoes` in `personas_original.json`. |
+| `<ROLE>`, `<SPECIALTY>`, `<PERSONA_INSTRUCTIONS>` | The role, specialty, and additional instructions defining the persona. |
 | `<NETWORK_NAME>` | `seismic` or `electricvehicle`, used only in the separate familiarity query. |
 
 `PARENT_NAME` and `positive|negative|uncertain` inside the confidence JSON schema are literal instructions present in the original prompt. They are not angle-bracket placeholders introduced by this document.
 
 ## 2. Message composition and routing
 
-The archived call interface stores a system-message string and a user-message string for each request. Persona conditions combine their system instruction with the same user-prompt construction used by control. The control CPT calls have an empty `system_prompt`; no neutral-expert role instruction replaces it.
+Each request combines a system instruction with a user prompt. Persona conditions use the role-specific system instructions in Section 4. Control uses an empty system instruction and the same user-prompt template.
 
-The supplied inference code constructs a fresh message list for each call. The archived records identify the chat-template strategy as `processor_text_only_nonthinking`. This document preserves the logical message texts; it does not claim to preserve an immutable tokenizer revision or the full serialized token sequence.
+Requests use a fresh context, with thinking mode configured as disabled. The user prompt contains the local node descriptions and the question to be answered. Generation settings are summarized in Section 11.
 
 | Call type | System instruction | User message | Function in the procedure |
 |---|---|---|---|
@@ -50,7 +48,7 @@ The description builder uses the following available input fields, in this order
 - <NODE_NAME>: <COMPOSED_DESCRIPTION> Possible states: [<STATES_IN_ORDER>]
 ```
 
-State names and their order come from the generation input JSON. They must be retained when interpreting the numerical tuple. Parent configurations are enumerated from the ordered parent-state lists; the rightmost parent changes fastest. The call logs preserve the actual parent order and assignments.
+State names and their order are defined in the network specification. They must be retained when interpreting the numerical tuple. Parent configurations are enumerated from the ordered parent-state lists; the rightmost parent changes fastest. The parent order is retained when constructing each conditional query.
 
 For `electricvehicle`, the generation inputs explicitly order states as `no, yes` for the ordinal approximation and state that the event horizon is not fixed. These are input modeling assumptions. They do not establish that binary failure mechanisms are adequately represented by a weighted mean.
 
@@ -103,17 +101,17 @@ Additional persona instructions supplied by the researcher: <PERSONA_INSTRUCTION
 Follow the exact output format requested by the user prompt. Report uncertainty honestly.
 ```
 
-The documentary persona weights are not inserted into these system messages. The same persona strings are present for 4B and 9B within each domain. The risk-analyst role has domain-specific wording and is therefore reproduced separately for the two networks.
+Persona weights are applied during pooling. Within each domain, Qwen3.5-4B and Qwen3.5-9B receive the same persona instructions. The risk-analyst instructions differ between domains and are presented separately.
 
 ### 4.1. Control
 
-For control CPT calls, `system_prompt` is an empty string. The user template and node context remain in place.
+Control uses the user template and node context with an empty system instruction.
 
-### 4.2. seismic personas
+### 4.2. Seismic personas
 
 #### P1: Structural engineer
 
-Persona ID: `engenheiro_estrutural`. Source: `personas_original.json` in the `seismic` archives. **Archived system message:**
+**Models:** Qwen3.5-4B and Qwen3.5-9B. **System instruction:**
 
 ```text
 You are acting in the role of: Structural engineer.
@@ -124,7 +122,7 @@ Follow the exact output format requested by the user prompt. Report uncertainty 
 
 #### P2: Seismologist
 
-Persona ID: `sismologista`. Source: `personas_original.json` in the `seismic` archives. **Archived system message:**
+**Models:** Qwen3.5-4B and Qwen3.5-9B. **System instruction:**
 
 ```text
 You are acting in the role of: Seismologist.
@@ -135,7 +133,7 @@ Follow the exact output format requested by the user prompt. Report uncertainty 
 
 #### P3: Probabilistic risk analyst
 
-Persona ID: `analista_risco`. Source: `personas_original.json` in the `seismic` archives. **Archived system message:**
+**Models:** Qwen3.5-4B and Qwen3.5-9B. **System instruction:**
 
 ```text
 You are acting in the role of: Probabilistic risk analyst.
@@ -144,11 +142,11 @@ Additional persona instructions supplied by the researcher: Provide your best in
 Follow the exact output format requested by the user prompt. Report uncertainty honestly.
 ```
 
-### 4.3. electricvehicle personas
+### 4.3. Electric-vehicle personas
 
 #### P1: Electric vehicle systems engineer
 
-Persona ID: `engenheiro_veiculos_eletricos`. Source: `personas_original.json` in the `electricvehicle` archives. **Archived system message:**
+**Models:** Qwen3.5-4B and Qwen3.5-9B. **System instruction:**
 
 ```text
 You are acting in the role of: Electric vehicle systems engineer.
@@ -159,7 +157,7 @@ Follow the exact output format requested by the user prompt. Report uncertainty 
 
 #### P2: Automotive fire safety and reliability specialist
 
-Persona ID: `especialista_seguranca_automotiva`. Source: `personas_original.json` in the `electricvehicle` archives. **Archived system message:**
+**Models:** Qwen3.5-4B and Qwen3.5-9B. **System instruction:**
 
 ```text
 You are acting in the role of: Automotive fire safety and reliability specialist.
@@ -170,7 +168,7 @@ Follow the exact output format requested by the user prompt. Report uncertainty 
 
 #### P3: Probabilistic risk analyst
 
-Persona ID: `analista_risco`. Source: `personas_original.json` in the `electricvehicle` archives. **Archived system message:**
+**Models:** Qwen3.5-4B and Qwen3.5-9B. **System instruction:**
 
 ```text
 You are acting in the role of: Probabilistic risk analyst.
@@ -217,7 +215,7 @@ Return ONLY one valid JSON object in exactly this structure:
 Include every parent exactly once and every row index from 0 to <LAST_ROW_INDEX> exactly once. Do not include explanations outside the JSON.
 ```
 
-The ordinal direction refers to higher states in the supplied order. The recorded screen can influence later direct/ranked-node routing and RNM fitting; it does not validate the selected probabilities. All 112 archived confidence requests were made at temperature 0.0 on their first parsing attempt.
+The ordinal direction refers to higher states in the supplied order. The recorded screen can influence later direct/ranked-node routing and RNM fitting; it does not validate the selected probabilities. All 112 confidence requests used greedy decoding at temperature 0.0 and were accepted on the first parsing attempt.
 
 ## 6. FullDist user template
 
@@ -251,11 +249,11 @@ Given that <PARENT_1> is <STATE_1>, <PARENT_2> is <STATE_2>, what is the probabi
 
 The number of parent assignments varies by node. Numerical tuple entries must correspond to `Order of states`; variable labels and reference-state ordering must not be silently interchanged. The request for a final marker does not by itself ensure that the extractor accepts a tuple actually endorsed by the response.
 
-## 7. Retry behavior present in the archived calls
+## 7. Retry procedure
 
 ### 7.1. Seismic runs
 
-The seismic parsing retries repeat the original user prompt and keep the same system instruction for the condition. Five additional FullDist attempts occur in the 4B archive and one in the 9B archive. One 4B request reaches parsing attempt 3; its text is still the original FullDist prompt.
+Seismic retries repeat the original user prompt and retain the system instruction for the condition. Qwen3.5-4B required five additional FullDist attempts and Qwen3.5-9B required one. One Qwen3.5-4B request reached a third parsing attempt using the same FullDist wording.
 
 ### 7.2. Electric-vehicle runs
 
@@ -265,21 +263,19 @@ The first FullDist parsing attempt uses the original user prompt. Recorded secon
 Clarification for probability elicitation: the task is to produce a SUBJECTIVE prior probability assessment, not to retrieve empirical frequencies or the benchmark CPT. No dataset is expected or available. Use general domain reasoning, explicitly acknowledge uncertainty, and end with EXACTLY the requested numeric tuple in state order. Unknown/undefined/NaN or an all-zero tuple are not probabilities. Do not claim these numbers are measured facts.
 ```
 
-The system instruction remains unchanged. The additional text appears in 21 calls for 4B and 12 calls for 9B, under `prompt_revision = subjective_prior_reprompt_v2`. The complete retry input is the original FullDist message plus the suffix above; it is not a conversation containing the previous response.
+The second attempt retains the system instruction and appends the clarification to the original FullDist prompt. This procedure was used in 21 Qwen3.5-4B calls and 12 Qwen3.5-9B calls. Each retry is issued in a fresh context.
 
-No third-or-later electric-vehicle parsing attempt appears in these archived calls. Consequently, no further electric-vehicle retry wording is exported here as an observed prompt.
+All electric-vehicle FullDist requests were completed within two parsing attempts.
 
-### 7.3. Relationship to the supplied notebooks
+### 7.3. Retry limits and implementation
 
-In the two consulted notebook copies, `query_llm_full_distribution` repeats the original prompt on parsing retries and raises the output-token limit after the first attempt. It does not contain the archived electric-vehicle clarification. The base FullDist, confidence, persona, and familiarity text builders match the archived messages; the electric-vehicle retry addition is established directly from the call logs.
-
-The supplied notebook constants allow five FullDist parsing attempts and four confidence parsing attempts. The observed attempt counts are reported in Section 10. Preserve this distinction when packaging the historical implementation or running a revised one.
+The available generation implementation allows up to five FullDist parsing attempts and four confidence parsing attempts, increasing the FullDist output limit after the first attempt. It resubmits the base prompt on retry. Reproducing the electric-vehicle runs additionally requires the clarification in Section 7.2, which was present in those executions.
 
 ## 8. Preliminary network-familiarity query
 
-Each network–model archive contains one separate network-name query in `familiaridade_rede_chamadas.jsonl`. It is distinct from the confidence screen for conditional rows and has its own system instruction. The supplied procedure gives this query a fresh context and does not inject its response into the CPT prompts.
+A preliminary query asks each model about its familiarity with the named network. This diagnostic is performed once per network–model pair, in a fresh context, with the system instruction below. Its response is not included in subsequent CPT-elicitation prompts.
 
-**Archived system message:**
+**System instruction:**
 
 ```text
 You are participating in a scientific study of Bayesian network parameter elicitation. Report uncertainty accurately. Do not pretend to remember a benchmark, graph or CPT when you only recognize its general topic. Do not invent numerical probabilities. You have no external tools in this query.
@@ -291,19 +287,28 @@ You are participating in a scientific study of Bayesian network parameter elicit
 Before being shown any graph, node descriptions, states, data, or probability tables: were you ALREADY familiar with the SPECIFIC named Bayesian network benchmark "<NETWORK_NAME>"? Distinguish clearly: (a) knowledge of its general domain, (b) recognition of this exact benchmark/network by name, (c) prior knowledge of its original nodes and edges, and (d) prior knowledge of its original numerical CPTs. Answer yes, no, or uncertain for each aspect and briefly explain what you know, or say you do not know. Do not guess CPT numbers or claim that the generic domain is the named benchmark.
 ```
 
-The network name is the only network-specific information in this diagnostic request. The four records are additional to the 423 generation calls counted below. A model's denial of familiarity is a self-report and does not rule out pretraining exposure.
+The network name is the only network-specific information in this diagnostic request. These four diagnostic queries are additional to the 423 generation calls summarized in Section 10. A model's denial of familiarity is a self-report and does not rule out pretraining exposure.
 
-## 9. Complete examples from the archived messages
+## 9. Complete prompt examples
 
-The examples below preserve the full user message. Their system instruction is identified separately and, for persona conditions, reproduced in Section 4. They illustrate inputs; no reference probabilities or substituted numerical answers have been added.
+Each example presents the complete user prompt for a specific model and condition. Persona system instructions are given in Section 4. Generation parameters accompany each example.
 
 ### 9.1. Seismic confidence screen
 
-Archive: `resultados_qwen35_4b_confidence_ranked_nodes_seismic.zip`; member: `logs/controle_ConfidenceRankedNodes_r1_chamadas.jsonl`; JSONL line: 2; call ID: 3; condition: `controle`; parsing attempt: 1.
+| Setting | Value |
+|---|---|
+| Model | Qwen3.5-4B |
+| Network | seismic |
+| Condition | Control |
+| Target node | ShakingIntensity |
+| Parent configuration | All 9 configurations of Distance, Magnitude |
+| Decoding | Greedy; temperature 0.0; maximum 1,536 output tokens |
+| Generation / parsing attempt | r1 / 1 |
+| Call seed | 3222242815 |
 
-System instruction: empty string (control).
+System instruction: empty (control).
 
-**Archived user message:**
+**Example message:**
 
 ```text
 These variables belong to a Bayesian Network:
@@ -349,11 +354,20 @@ Include every parent exactly once and every row index from 0 to 8 exactly once. 
 
 ### 9.2. Seismic root FullDist
 
-Archive: `resultados_qwen35_4b_confidence_ranked_nodes_seismic.zip`; member: `logs/controle_ConfidenceRankedNodes_r1_chamadas.jsonl`; JSONL line: 4; call ID: 5; condition: `controle`; parsing attempt: 1.
+| Setting | Value |
+|---|---|
+| Model | Qwen3.5-4B |
+| Network | seismic |
+| Condition | Control |
+| Target node | Magnitude |
+| Parent configuration | Unconditional root distribution |
+| Decoding | Sampling; temperature 0.1; top-p 1.0; maximum 2,048 output tokens |
+| Generation / parsing attempt | r1 / 1 |
+| Call seed | 4098443485 |
 
-System instruction: empty string (control).
+System instruction: empty (control).
 
-**Archived user message:**
+**Example message:**
 
 ```text
 These nodes are related to the question inside a Bayesian Network:
@@ -369,11 +383,20 @@ Given that there are no parent conditions, what is the probability distribution 
 
 ### 9.3. Seismic conditional FullDist
 
-Archive: `resultados_qwen35_9b_confidence_ranked_nodes_seismic.zip`; member: `logs/engenheiro_estrutural_ConfidenceRankedNodes_r1_chamadas.jsonl`; JSONL line: 18; call ID: 42; condition: `engenheiro_estrutural`; parsing attempt: 1.
+| Setting | Value |
+|---|---|
+| Model | Qwen3.5-9B |
+| Network | seismic |
+| Condition | P1 — Structural engineer |
+| Target node | StrengthDegradation |
+| Parent configuration | ConstructionQuality=Low |
+| Decoding | Sampling; temperature 0.1; top-p 1.0; maximum 2,048 output tokens |
+| Generation / parsing attempt | r1 / 1 |
+| Call seed | 1597556010 |
 
-System instruction: the `engenheiro_estrutural` message in Section 4 for `seismic`.
+System instruction: P1, Structural engineer (Section 4.2).
 
-**Archived user message:**
+**Example message:**
 
 ```text
 These nodes are related to the question inside a Bayesian Network:
@@ -390,11 +413,20 @@ Given that ConstructionQuality is Low, what is the probability distribution of S
 
 ### 9.4. Electric-vehicle confidence screen
 
-Archive: `resultados_qwen35_4b_confidence_ranked_nodes_eletric.zip`; member: `logs/controle_ConfidenceRankedNodes_r1_chamadas.jsonl`; JSONL line: 16; call ID: 17; condition: `controle`; parsing attempt: 1.
+| Setting | Value |
+|---|---|
+| Model | Qwen3.5-4B |
+| Network | electricvehicle |
+| Condition | Control |
+| Target node | CBI |
+| Parent configuration | All 4 configurations of IS, CI |
+| Decoding | Greedy; temperature 0.0; maximum 1,536 output tokens |
+| Generation / parsing attempt | r1 / 1 |
+| Call seed | 2989137400 |
 
-System instruction: empty string (control).
+System instruction: empty (control).
 
-**Archived user message:**
+**Example message:**
 
 ```text
 These variables belong to a Bayesian Network:
@@ -435,11 +467,20 @@ Include every parent exactly once and every row index from 0 to 3 exactly once. 
 
 ### 9.5. Electric-vehicle root FullDist
 
-Archive: `resultados_qwen35_4b_confidence_ranked_nodes_eletric.zip`; member: `logs/controle_ConfidenceRankedNodes_r1_chamadas.jsonl`; JSONL line: 1; call ID: 2; condition: `controle`; parsing attempt: 1.
+| Setting | Value |
+|---|---|
+| Model | Qwen3.5-4B |
+| Network | electricvehicle |
+| Condition | Control |
+| Target node | BF |
+| Parent configuration | Unconditional root distribution |
+| Decoding | Sampling; temperature 0.1; top-p 1.0; maximum 2,048 output tokens |
+| Generation / parsing attempt | r1 / 1 |
+| Call seed | 643433159 |
 
-System instruction: empty string (control).
+System instruction: empty (control).
 
-**Archived user message:**
+**Example message:**
 
 ```text
 These nodes are related to the question inside a Bayesian Network:
@@ -455,11 +496,20 @@ Given that there are no parent conditions, what is the probability distribution 
 
 ### 9.6. Electric-vehicle conditional FullDist
 
-Archive: `resultados_qwen35_9b_electricvehicle_confidence_ranked_nodes.zip`; member: `logs/engenheiro_veiculos_eletricos_ConfidenceRankedNodes_r1_chamadas.jsonl`; JSONL line: 25; call ID: 53; condition: `engenheiro_veiculos_eletricos`; parsing attempt: 1.
+| Setting | Value |
+|---|---|
+| Model | Qwen3.5-9B |
+| Network | electricvehicle |
+| Condition | P1 — Electric vehicle systems engineer |
+| Target node | CBI |
+| Parent configuration | IS=no, CI=no |
+| Decoding | Sampling; temperature 0.1; top-p 1.0; maximum 2,048 output tokens |
+| Generation / parsing attempt | r1 / 1 |
+| Call seed | 3119613890 |
 
-System instruction: the `engenheiro_veiculos_eletricos` message in Section 4 for `electricvehicle`.
+System instruction: P1, Electric vehicle systems engineer (Section 4.3).
 
-**Archived user message:**
+**Example message:**
 
 ```text
 These nodes are related to the question inside a Bayesian Network:
@@ -475,9 +525,9 @@ Order of states: (no, yes)
 Given that IS is no, CI is no, what is the probability distribution of CBI?
 ```
 
-## 10. Prompt-reconstruction checks
+## 10. Verification and call counts
 
-The documentation was checked against every archived generation request. The common notebook formatters reconstruct the 112 confidence messages and the base FullDist messages exactly. For the 33 electric-vehicle retries, appending the recorded clarification reconstructs the complete user message. Every persona/control system string and all four familiarity system/user pairs were also matched.
+The templates were checked against 112 confidence requests and 311 FullDist requests. The electric-vehicle clarification accounts for 33 of the FullDist requests. All system instructions and the four familiarity queries were also matched to the messages used during execution.
 
 | Network | Model | Confidence calls | FullDist calls, including retries | Additional FullDist attempts | Maximum FullDist parsing attempt |
 |---|---|---:|---:|---:|---:|
@@ -486,36 +536,29 @@ The documentation was checked against every archived generation request. The com
 | `electricvehicle` | `Qwen3.5-4B` | 32 | 83 | 21 | 2 |
 | `electricvehicle` | `Qwen3.5-9B` | 32 | 134 | 12 | 2 |
 
-These counts total **112 confidence calls and 311 FullDist calls**, including **39 additional FullDist attempts**, plus **four separate familiarity calls**. The 39 additional attempts correspond to parsing retries; this document does not assign them an error category without consulting the parser records.
+The runs comprise **112 confidence calls and 311 FullDist calls**, including **39 additional FullDist attempts**, plus **four familiarity queries**. Retry counts describe attempts to obtain a parsable response.
 
-Both notebook copies contain the same relevant text-building function bodies. These are text-construction checks using preserved inputs and messages, not new model executions, a reproduction of the evaluation metrics, or verification of semantic correctness of generated probabilities.
+Verification establishes equivalence of the prompt text for the recorded conditions. Evaluation of the generated probabilities and the accepted responses is performed separately.
 
-## 11. Source inventory and integrity
+## 11. Experimental configuration
 
-The source ZIP names below identify the files consulted for this document. Member paths refer to entries inside each ZIP. Preserve these artifacts or record any packaging transformations explicitly.
+Both model sizes use the same base templates, confidence threshold, and RNM hyperparameters. Domain-specific context and persona instructions determine the textual differences between networks.
 
-| Source ZIP | Model / network | Recorded run start (UTC) | SHA-256 |
-|---|---|---|---|
-| `resultados_qwen35_4b_confidence_ranked_nodes_seismic.zip` | `Qwen3.5-4B` / `seismic` | `2026-10-05T11:43:10.136646+00:00` | `9f4bd951e0a6429dafbd28523b2d6b536c284adf9d1a2cc028cfda30b7c78826` |
-| `resultados_qwen35_9b_confidence_ranked_nodes_seismic.zip` | `Qwen3.5-9B` / `seismic` | `2026-10-03T23:02:48.147007+00:00` | `083b9b85a005243423d8eba50df2c9e6d2bc9952702fdc18c51459fcee2eb49d` |
-| `resultados_qwen35_4b_confidence_ranked_nodes_eletric.zip` | `Qwen3.5-4B` / `electricvehicle` | `2026-10-08T21:43:14.542057+00:00` | `eb908639bf0ae95aefe00dfab0f4650b018c2f9cbbd6c474b95374c794e4450b` |
-| `resultados_qwen35_9b_electricvehicle_confidence_ranked_nodes.zip` | `Qwen3.5-9B` / `electricvehicle` | `2026-10-10T12:32:12.253735+00:00` | `5fd74699c5f79851d4a0ad418e7b83854ecc873412dc0cb42b7779ef1c93e9ea` |
-
-The prompt sources inside each generation archive are:
-
-- `logs/*_chamadas.jsonl`: exact system/user strings, condition, phase, parsing attempt, and recorded call metadata.
-- `personas_original.json`: role, specialty, and additional instructions for each domain persona.
-- `rede_original.json`: network and node metadata, state meanings, and supplied state orders.
-- `familiaridade_rede_chamadas.jsonl`: the separate name-only familiarity request.
-- `manifesto_geracao.json`: model, network identifier, run configuration, and execution inventory.
-
-The consulted notebook copies are listed separately because their names and upload dates alone do not establish that they contain every historical runtime change:
-
-| Notebook | SHA-256 |
+| Setting | Configuration |
 |---|---|
-| `Qwen35_4B_01_Gerar_CPTs_Confidence_RankedNodes_Colab_SemDrive(4).ipynb` | `c38b0356dd24883f69b471149f55ddc47211be00f61e70f25e0d38d364699177` |
-| `Qwen35_9B_01_Gerar_CPTs_Confidence_RankedNodes_Colab_SemDrive(6).ipynb` | `c5857e18ed18692d40b9e0f899bd941ebcafa1c1bd94b74bf62377b31f1718a1` |
+| Models | Qwen3.5-4B and Qwen3.5-9B |
+| Checkpoints | `Qwen/Qwen3.5-4B`; `Qwen/Qwen3.5-9B` |
+| Hardware | NVIDIA Tesla T4 |
+| Quantization | 4-bit NF4, double quantization, FP16 compute |
+| Transformers | 5.19.0.dev0 |
+| Thinking mode | Configured as disabled |
+| Base seed | 42; request-specific seeds are reported with the examples |
+| Repetitions | One network generation per model, network, and prompting condition |
+| Confidence screening | Greedy decoding; temperature 0.0; maximum 1,536 output tokens |
+| FullDist, first attempt | Sampling; temperature 0.1; top-p 1.0; maximum 2,048 output tokens |
+| FullDist, retry | Sampling; temperature 0.1; top-p 1.0; maximum 4,096 output tokens |
+| Confidence gate | Direct elicitation when row confidence is at least 0.80 |
+| RNM spread | Default 0.16; fitting bounds [0.03, 0.45] |
+| RNM weight regularization | 0.02 toward equal parent weights |
 
-Relevant function names are `load_bn_spec`, `node_context_text`, `prompt_sistema_persona`, `format_prompt_confianca_no`, `format_epk_prompt_full_distribution`, `_prompt_familiaridade_rede`, and `query_llm_full_distribution`. The text-builder checks use the recorded parent ordering; they do not revalidate the network graph.
-
-For a particular result row, locate its network/model archive, condition, target node, parent assignment, and parsing attempt in the call logs. Inspect the accompanying parser records and accepted CPT when evaluating whether the response was processed correctly. Full generated responses and parsing decisions belong in the response-audit materials rather than being inferred from the prompt template.
+The exact loaded model commits and some inherited decoding defaults were not recorded. The settings above characterize the documented executions; they do not guarantee identical responses after a model, software, or hardware change.
