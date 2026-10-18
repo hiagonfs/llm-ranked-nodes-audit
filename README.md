@@ -37,14 +37,16 @@ The ZIPs preserve their internal organization, including complete CPTs, raw gene
 
 ## Notebook entry points
 
-| Network | Model | Inputs and archived outputs | Generation notebook | Google Colab |
-| --- | --- | --- | --- | --- |
-| seismic | Qwen3.5-4B | [Data](data/seismic/qwen-4b/) | [Generation](scripts/Qwen35_4B_01_Generate_CPTs_Confidence_RankedNodes.ipynb) | [Open](https://colab.research.google.com/github/hiagonfs/llm-ranked-nodes-audit/blob/main/scripts/Qwen35_4B_01_Generate_CPTs_Confidence_RankedNodes.ipynb) |
-| seismic | Qwen3.5-9B | [Data](data/seismic/qwen-9b/) | [Generation](scripts/Qwen35_9B_01_Generate_CPTs_Confidence_RankedNodes.ipynb) | [Open](https://colab.research.google.com/github/hiagonfs/llm-ranked-nodes-audit/blob/main/scripts/Qwen35_9B_01_Generate_CPTs_Confidence_RankedNodes.ipynb) |
-| electricvehicle | Qwen3.5-4B | [Data](data/electricvehicle/qwen-4b/) | [Generation](scripts/Qwen35_4B_01_ElectricVehicle_ConfidenceRankedNodes.ipynb) | [Open](https://colab.research.google.com/github/hiagonfs/llm-ranked-nodes-audit/blob/main/scripts/Qwen35_4B_01_ElectricVehicle_ConfidenceRankedNodes.ipynb) |
-| electricvehicle | Qwen3.5-9B | [Data](data/electricvehicle/qwen-9b/) | [Generation](scripts/Qwen35_9B_01_ElectricVehicle_ConfidenceRankedNodes.ipynb) | [Open](https://colab.research.google.com/github/hiagonfs/llm-ranked-nodes-audit/blob/main/scripts/Qwen35_9B_01_ElectricVehicle_ConfidenceRankedNodes.ipynb) |
+The four generation notebooks and the shared evaluation notebook are available in the [scripts directory](scripts/). Inputs and archived outputs are organized by network and model:
 
-All four pairs use the same [evaluation notebook](scripts/Qwen35_02_Evaluate_ConfidenceRankedNodes_bnRep.ipynb), also available [in Google Colab](https://colab.research.google.com/github/hiagonfs/llm-ranked-nodes-audit/blob/main/scripts/Qwen35_02_Evaluate_ConfidenceRankedNodes_bnRep.ipynb). Re-evaluating archived outputs uses a **CPU runtime**. Generating new model responses requires a **CUDA GPU runtime**.
+| Network | Model | Inputs and archived outputs |
+| --- | --- | --- |
+| seismic | Qwen3.5-4B | [Data](data/seismic/qwen-4b/) |
+| seismic | Qwen3.5-9B | [Data](data/seismic/qwen-9b/) |
+| electricvehicle | Qwen3.5-4B | [Data](data/electricvehicle/qwen-4b/) |
+| electricvehicle | Qwen3.5-9B | [Data](data/electricvehicle/qwen-9b/) |
+
+All four pairs use the shared evaluation notebook. Re-evaluating archived outputs uses a **CPU runtime**. Generating new model responses requires a **CUDA GPU runtime**.
 
 ## Study design
 
