@@ -269,7 +269,7 @@ All electric-vehicle FullDist requests were completed within two parsing attempt
 
 ### 7.3. Retry limits and implementation
 
-The available generation implementation allows up to five FullDist parsing attempts and four confidence parsing attempts, increasing the FullDist output limit after the first attempt. It resubmits the base prompt on retry. Reproducing the electric-vehicle runs additionally requires the clarification in Section 7.2, which was present in those executions.
+The generation notebooks allow up to five FullDist parsing attempts and four confidence parsing attempts, increasing the FullDist output limit after the first attempt. The seismic notebooks resubmit the base prompt on retry. The electric-vehicle notebooks already append the clarification in Section 7.2 on the second attempt; from the third attempt they also permit an explicit symmetric subjective prior. If all FullDist attempts fail, the current electric-vehicle implementation records an identified uniform fallback for root/non-ordinal rows or reassigns failed conditional anchors to Ranked Nodes. The evaluated electric-vehicle runs completed within two parsing attempts and contain no final uniform error-fallback rows. Additional retry stages and fallback behavior must be distinguished from the archived evaluated outputs.
 
 ## 8. Preliminary network-familiarity query
 
