@@ -1,0 +1,56 @@
+{
+  "versao": 1,
+  "controle": {
+    "ativo": true
+  },
+  "calibracao": {
+    "metodos": [
+      "SepState",
+      "FullDist"
+    ],
+    "repeticoes": 1,
+    "somente_recombinar": false,
+    "pesos_por_no": {
+      "SeismicHazard": {
+        "engenheiro_estrutural": 0.15,
+        "sismologista": 0.7,
+        "analista_risco": 0.15
+      },
+      "Fragility": {
+        "engenheiro_estrutural": 0.7,
+        "sismologista": 0.1,
+        "analista_risco": 0.2
+      }
+    }
+  },
+  "baselines": {
+    "llm_no_context_e_random": false,
+    "probabilidades_tokens": false
+  },
+  "personas": [
+    {
+      "id": "engenheiro_estrutural",
+      "ativo": true,
+      "papel": "Structural engineer",
+      "especialidade": "Structural fragility, construction quality and building vulnerability",
+      "instrucoes": "Estimate the requested conditional probability from structural-engineering domain knowledge. State relevant assumptions and uncertainty. Do not claim to have looked up data or exact frequencies.",
+      "peso": 0.5
+    },
+    {
+      "id": "sismologista",
+      "ativo": true,
+      "papel": "Seismologist",
+      "especialidade": "Earthquake magnitude, shaking intensity, distance and seismic hazard",
+      "instrucoes": "Estimate conditional probabilities using domain knowledge of seismic phenomena. Explain physical relationships and acknowledge uncertainty without inventing measurements.",
+      "peso": 0.3
+    },
+    {
+      "id": "analista_risco",
+      "ativo": true,
+      "papel": "Probabilistic risk analyst",
+      "especialidade": "Risk assessment and uncertainty quantification",
+      "instrucoes": "Provide your best informed conditional probability estimate and state major sources of uncertainty. Use no external datasets and do not present guessed probabilities as empirical measurements.",
+      "peso": 0.2
+    }
+  ]
+}

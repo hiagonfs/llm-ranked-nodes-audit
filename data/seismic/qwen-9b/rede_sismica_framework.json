@@ -1,0 +1,292 @@
+{
+  "network": {
+    "name": "SeismicRiskBN",
+    "domain": "Seismic risk assessment",
+    "description": "This Bayesian Network represents conceptual relationships among earthquake characteristics, site conditions, structural condition, fragility, vulnerability, and seismic risk.",
+    "elicitation_mode": "EPK_PURE",
+    "language": "en",
+    "notes": "Node descriptions define the semantic meaning of variables and states. No numerical probabilities or ground-truth CPT information are provided."
+  },
+  "nodes": [
+    {
+      "name": "Distance",
+      "definition": "Distance represents the distance from the structure or site to the earthquake source or epicenter.",
+      "entity": "Structure or site under seismic assessment.",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "Short",
+          "meaning": "The structure or site is close to the earthquake source."
+        },
+        {
+          "name": "Medium",
+          "meaning": "The structure or site is at an intermediate distance from the earthquake source."
+        },
+        {
+          "name": "Long",
+          "meaning": "The structure or site is far from the earthquake source."
+        }
+      ],
+      "temporal_context": "Condition considered for a seismic event or seismic assessment scenario.",
+      "measurement_context": "Qualitative discretization of source-to-site distance.",
+      "notes": "Distance is represented as an ordered categorical variable from closer to farther."
+    },
+    {
+      "name": "Magnitude",
+      "definition": "Magnitude represents the severity or released energy of an earthquake event.",
+      "entity": "Earthquake event considered in the seismic assessment.",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "Low",
+          "meaning": "The earthquake has low magnitude or low released seismic energy."
+        },
+        {
+          "name": "Medium",
+          "meaning": "The earthquake has intermediate magnitude or intermediate released seismic energy."
+        },
+        {
+          "name": "High",
+          "meaning": "The earthquake has high magnitude or high released seismic energy."
+        }
+      ],
+      "temporal_context": "Observed or assumed for the earthquake event being assessed.",
+      "measurement_context": "Qualitative discretization of earthquake magnitude.",
+      "notes": "Magnitude is represented as an ordered categorical variable from lower to higher severity."
+    },
+    {
+      "name": "ShakingIntensity",
+      "definition": "ShakingIntensity represents the level of ground shaking experienced at the structure or site.",
+      "entity": "Structure or site affected by the earthquake event.",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "Low",
+          "meaning": "The site experiences low ground shaking intensity."
+        },
+        {
+          "name": "Medium",
+          "meaning": "The site experiences intermediate ground shaking intensity."
+        },
+        {
+          "name": "High",
+          "meaning": "The site experiences high ground shaking intensity."
+        }
+      ],
+      "temporal_context": "Condition during the earthquake event or seismic scenario.",
+      "measurement_context": "Qualitative classification of ground motion intensity at the site.",
+      "notes": "Shaking intensity is an ordered category describing the severity of ground motion."
+    },
+    {
+      "name": "SeismicHazard",
+      "definition": "SeismicHazard represents the level of earthquake hazard affecting the structure or site.",
+      "entity": "Structure or site exposed to seismic action.",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "Low",
+          "meaning": "The structure or site is exposed to a low level of seismic hazard."
+        },
+        {
+          "name": "Medium",
+          "meaning": "The structure or site is exposed to an intermediate level of seismic hazard."
+        },
+        {
+          "name": "High",
+          "meaning": "The structure or site is exposed to a high level of seismic hazard."
+        }
+      ],
+      "temporal_context": "Condition assessed for a seismic event or seismic hazard scenario.",
+      "measurement_context": "Qualitative classification of the hazard level acting on the structure or site.",
+      "notes": "Seismic hazard is represented as an ordered category from lower to higher hazard."
+    },
+    {
+      "name": "ConstructionQuality",
+      "definition": "ConstructionQuality represents the quality of design, materials, construction practices, and structural detailing.",
+      "entity": "Structure or building under seismic assessment.",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "Low",
+          "meaning": "The structure has low construction quality, poor materials, inadequate detailing, or deficient construction practices."
+        },
+        {
+          "name": "Medium",
+          "meaning": "The structure has intermediate construction quality, materials, detailing, or construction practices."
+        },
+        {
+          "name": "High",
+          "meaning": "The structure has high construction quality, good materials, adequate detailing, or reliable construction practices."
+        }
+      ],
+      "temporal_context": "Condition associated with the construction and current assessment of the structure.",
+      "measurement_context": "Qualitative classification of structural construction quality.",
+      "notes": "Construction quality is represented as an ordered category from poorer to better quality."
+    },
+    {
+      "name": "StrengthDegradation",
+      "definition": "StrengthDegradation represents the reduction of structural strength due to deterioration, aging, damage, or material degradation.",
+      "entity": "Structure or building under seismic assessment.",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "Low",
+          "meaning": "The structure has low degradation of structural strength."
+        },
+        {
+          "name": "Medium",
+          "meaning": "The structure has intermediate degradation of structural strength."
+        },
+        {
+          "name": "High",
+          "meaning": "The structure has high degradation of structural strength."
+        }
+      ],
+      "temporal_context": "Condition at the time of the structural or seismic assessment.",
+      "measurement_context": "Qualitative classification of the current level of structural strength degradation.",
+      "notes": "Strength degradation is represented as an ordered category from lower to higher degradation."
+    },
+    {
+      "name": "LiveLoad",
+      "definition": "LiveLoad represents the variable load acting on the structure, such as occupants, furniture, equipment, and temporary loads.",
+      "entity": "Structure or building under seismic assessment.",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "Low",
+          "meaning": "The structure is subject to a low level of live load."
+        },
+        {
+          "name": "Medium",
+          "meaning": "The structure is subject to an intermediate level of live load."
+        },
+        {
+          "name": "High",
+          "meaning": "The structure is subject to a high level of live load."
+        }
+      ],
+      "temporal_context": "Condition considered at the time of seismic assessment or during the seismic scenario.",
+      "measurement_context": "Qualitative classification of variable imposed load level.",
+      "notes": "Live load is represented as an ordered category from lower to higher load."
+    },
+    {
+      "name": "Fragility",
+      "definition": "Fragility represents the tendency or likelihood of the structure to suffer damage under seismic loading.",
+      "entity": "Structure or building exposed to seismic loading.",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "Low",
+          "meaning": "The structure has low fragility and is less susceptible to damage under seismic loading."
+        },
+        {
+          "name": "Medium",
+          "meaning": "The structure has intermediate fragility and moderate susceptibility to damage under seismic loading."
+        },
+        {
+          "name": "High",
+          "meaning": "The structure has high fragility and is more susceptible to damage under seismic loading."
+        }
+      ],
+      "temporal_context": "Condition under the seismic loading scenario being assessed.",
+      "measurement_context": "Qualitative classification of structural damage susceptibility.",
+      "notes": "Fragility is represented as an ordered category from lower to higher damage susceptibility."
+    },
+    {
+      "name": "Vulnerability",
+      "definition": "Vulnerability represents the susceptibility of the structure to damage or loss when exposed to seismic effects.",
+      "entity": "Structure or building under seismic risk assessment.",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "Low",
+          "meaning": "The structure has low vulnerability to damage or loss."
+        },
+        {
+          "name": "Medium",
+          "meaning": "The structure has intermediate vulnerability to damage or loss."
+        },
+        {
+          "name": "High",
+          "meaning": "The structure has high vulnerability to damage or loss."
+        }
+      ],
+      "temporal_context": "Condition considered during seismic risk assessment.",
+      "measurement_context": "Qualitative classification of structural susceptibility to seismic damage or loss.",
+      "notes": "Vulnerability is represented as an ordered category from lower to higher susceptibility."
+    },
+    {
+      "name": "SeismicRisk",
+      "definition": "SeismicRisk represents the overall risk of seismic damage or loss for the structure.",
+      "entity": "Structure or building exposed to seismic hazard.",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "Low",
+          "meaning": "The structure has low overall seismic risk."
+        },
+        {
+          "name": "Medium",
+          "meaning": "The structure has intermediate overall seismic risk."
+        },
+        {
+          "name": "High",
+          "meaning": "The structure has high overall seismic risk."
+        }
+      ],
+      "temporal_context": "Condition assessed for the seismic event or scenario.",
+      "measurement_context": "Qualitative classification of expected seismic damage or loss risk.",
+      "notes": "Seismic risk is represented as an ordered category from lower to higher risk."
+    }
+  ],
+  "edges": [
+    {
+      "source": "Distance",
+      "target": "ShakingIntensity"
+    },
+    {
+      "source": "Distance",
+      "target": "SeismicHazard"
+    },
+    {
+      "source": "Magnitude",
+      "target": "ShakingIntensity"
+    },
+    {
+      "source": "Magnitude",
+      "target": "SeismicHazard"
+    },
+    {
+      "source": "ShakingIntensity",
+      "target": "SeismicHazard"
+    },
+    {
+      "source": "SeismicHazard",
+      "target": "Fragility"
+    },
+    {
+      "source": "LiveLoad",
+      "target": "Fragility"
+    },
+    {
+      "source": "ConstructionQuality",
+      "target": "StrengthDegradation"
+    },
+    {
+      "source": "StrengthDegradation",
+      "target": "Fragility"
+    },
+    {
+      "source": "Fragility",
+      "target": "Vulnerability"
+    },
+    {
+      "source": "Vulnerability",
+      "target": "SeismicRisk"
+    },
+    {
+      "source": "SeismicHazard",
+      "target": "SeismicRisk"
+    }
+  ]
+}

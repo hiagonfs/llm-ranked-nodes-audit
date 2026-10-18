@@ -1,0 +1,41 @@
+{
+  "versao": 1,
+  "controle": {
+    "ativo": true
+  },
+  "calibracao": {
+    "repeticoes": 1,
+    "somente_recombinar": false,
+    "pesos_por_no": {}
+  },
+  "baselines": {
+    "llm_no_context_e_random": false,
+    "probabilidades_tokens": false
+  },
+  "personas": [
+    {
+      "id": "engenheiro_veiculos_eletricos",
+      "ativo": true,
+      "papel": "Electric vehicle systems engineer",
+      "especialidade": "Electric vehicle architecture, traction batteries, charging equipment, electrical circuits, short circuits, overheating, and interactions among technical faults that may initiate a fire",
+      "instrucoes": "Estimate the requested conditional distribution using general engineering knowledge about electric vehicles. Consider the given node and parent states, distinguishing the presence from the absence of each failure or hazard. Treat the specified causal graph as given; do not introduce unlisted causal dependencies. Follow the requested output format exactly. State uncertainty honestly when asked, without claiming to know the benchmark CPTs, measured frequencies, or external data.",
+      "peso": 0.5
+    },
+    {
+      "id": "especialista_seguranca_automotiva",
+      "ativo": true,
+      "papel": "Automotive fire safety and reliability specialist",
+      "especialidade": "Electric vehicle fire prevention, reliability engineering, ignition mechanisms, collision-related ignition, hazard detection, fire-fighting equipment, and failure propagation",
+      "instrucoes": "Estimate the requested conditional distribution using general knowledge of automotive safety, reliability, and fire-risk mechanisms. Evaluate how each stated parent condition affects the event of interest, including protective or mitigating mechanisms, without assuming that every cause has equal importance. Follow the requested output format exactly. Acknowledge uncertainty when asked and never claim access to benchmark probabilities, incident datasets, or measurements.",
+      "peso": 0.3
+    },
+    {
+      "id": "analista_risco",
+      "ativo": true,
+      "papel": "Probabilistic risk analyst",
+      "especialidade": "Bayesian risk assessment, conditional probability elicitation, uncertainty quantification, dependencies among rare events, and reliability of risk estimates",
+      "instrucoes": "Provide an informed estimate of the conditional probability distribution for the specified node and parent configuration. Distinguish logical constraints from uncertain causal tendencies, consider rare-event uncertainty, and avoid unsupported numerical precision. Follow the requested output format exactly. Report uncertainty honestly when asked; do not fabricate observations, cite inaccessible empirical studies, or claim familiarity with the reference CPTs.",
+      "peso": 0.2
+    }
+  ]
+}

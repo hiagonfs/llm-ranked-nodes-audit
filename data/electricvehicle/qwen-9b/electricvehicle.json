@@ -1,0 +1,540 @@
+{
+  "network": {
+    "name": "electricvehicle",
+    "bnrep_name": "electricvehicle",
+    "domain": "Electric vehicle fire risk assessment",
+    "description": "Fire-risk Bayesian network for electric vehicles, with component failures, environmental/human factors and intermediate ignition events. Based on the electricvehicle network documented in bnRep and Chen, Li and Yang (2022).",
+    "temporal_context": "No specific time horizon is stipulated in this input.",
+    "measurement_context": "Discrete binary event indicators; yes/no labels are retained, placed in risk-increasing order no to yes for the Ranked Nodes algorithm.",
+    "notes": "The file includes nodes, their descriptions, binary states and directed edges only. It deliberately omits all original conditional probability tables. Before quantitative evaluation, check edges using the accompanying R verification script against the bnRep package version used to export the gold network."
+  },
+  "nodes": [
+    {
+      "name": "ACF",
+      "definition": "Air conditioning equipment failure.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event ACF is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event ACF is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "AM",
+      "definition": "Artificial modification of the electric vehicle.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event AM is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event AM is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "AWE",
+      "definition": "The early fire is not detected or noticed.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event AWE is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event AWE is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "BEP",
+      "definition": "Blocked exhaust pipe.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event BEP is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event BEP is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "BF",
+      "definition": "Battery failure.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event BF is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event BF is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "BO",
+      "definition": "Battery overcharge.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event BO is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event BO is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "CBI",
+      "definition": "The car body is ignited.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event CBI is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event CBI is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "CEF",
+      "definition": "Charging equipment fault.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event CEF is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event CEF is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "CI",
+      "definition": "Collision ignition.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event CI is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event CI is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "DTH",
+      "definition": "Defroster temperature too high.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event DTH is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event DTH is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "EC",
+      "definition": "Electrical circuit failure.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event EC is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event EC is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "ECF",
+      "definition": "Electronic component failure.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event ECF is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event ECF is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "FFE",
+      "definition": "The vehicle is not equipped with fire-fighting equipment.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event FFE is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event FFE is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "HF",
+      "definition": "Human factor contributing to external ignition.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event HF is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event HF is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "IS",
+      "definition": "Ignition source.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event IS is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event IS is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "ISC",
+      "definition": "Risk of internal spontaneous combustion of electric vehicles.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event ISC is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event ISC is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "MMA",
+      "definition": "Man-made arson.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event MMA is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event MMA is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "OFE",
+      "definition": "The early open fire was not extinguished.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event OFE is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event OFE is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "REI",
+      "definition": "Risk of external ignition.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event REI is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event REI is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "SBB",
+      "definition": "Soaking of battery box (battery-pack flooding).",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event SBB is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event SBB is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "SCB",
+      "definition": "Short circuit in battery.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event SCB is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event SCB is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "TLD",
+      "definition": "Transmission line damage.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event TLD is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event TLD is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    },
+    {
+      "name": "VFD",
+      "definition": "Electric vehicle fire disaster.",
+      "entity": "Electric vehicle fire risk event",
+      "scale_type": "ordinal",
+      "states": [
+        {
+          "name": "no",
+          "meaning": "The event VFD is absent / does not occur."
+        },
+        {
+          "name": "yes",
+          "meaning": "The event VFD is present / occurs."
+        }
+      ],
+      "temporal_context": "Occurrence of the event within the modeled electric-vehicle fire scenario; no fixed time horizon specified.",
+      "measurement_context": "Binary event (no/yes). Ordered no < yes for Ranked Nodes as absence to occurrence; this is a modeling assumption, not the bnRep variable-class declaration.",
+      "notes": "Evaluate occurrence probability for this binary risk/failure event; the network contains no original CPT probabilities."
+    }
+  ],
+  "edges": [
+    {
+      "source": "BF",
+      "target": "SCB"
+    },
+    {
+      "source": "SBB",
+      "target": "SCB"
+    },
+    {
+      "source": "BO",
+      "target": "SCB"
+    },
+    {
+      "source": "CEF",
+      "target": "SCB"
+    },
+    {
+      "source": "ACF",
+      "target": "EC"
+    },
+    {
+      "source": "ECF",
+      "target": "EC"
+    },
+    {
+      "source": "TLD",
+      "target": "EC"
+    },
+    {
+      "source": "DTH",
+      "target": "EC"
+    },
+    {
+      "source": "IS",
+      "target": "CBI"
+    },
+    {
+      "source": "CI",
+      "target": "CBI"
+    },
+    {
+      "source": "MMA",
+      "target": "HF"
+    },
+    {
+      "source": "AM",
+      "target": "HF"
+    },
+    {
+      "source": "SCB",
+      "target": "ISC"
+    },
+    {
+      "source": "EC",
+      "target": "ISC"
+    },
+    {
+      "source": "BEP",
+      "target": "ISC"
+    },
+    {
+      "source": "CBI",
+      "target": "REI"
+    },
+    {
+      "source": "HF",
+      "target": "REI"
+    },
+    {
+      "source": "AWE",
+      "target": "OFE"
+    },
+    {
+      "source": "FFE",
+      "target": "OFE"
+    },
+    {
+      "source": "ISC",
+      "target": "VFD"
+    },
+    {
+      "source": "REI",
+      "target": "VFD"
+    },
+    {
+      "source": "OFE",
+      "target": "VFD"
+    }
+  ]
+}
